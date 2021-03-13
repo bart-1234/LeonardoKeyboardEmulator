@@ -1,4 +1,37 @@
+// Leonardo Keyboard Emulator version 1.0
+
 #include <Keyboard.h>
+
+struct io_port_t {
+  String ID;
+  int PortNr;
+  int Mode;
+  int DebounceTics;
+} ;
+
+// define constants that are used in the program, makes changes easier
+#define DEFAULT_DEBOUNCE_TICS 100                     // default debounce tics
+#define IOPORTS 3                                     // the number of io ports to initialize
+ 
+io_port_t test_port={"X_min",0,INPUT_PULLUP};         // showing how to define a variable structure
+
+// define the io ports to initialze and use, put them in an array that is easier to maintain
+// currently 3 io ports are defined
+
+// create an array that holds the io ports
+io_port_t io_ports[IOPORTS]={                         // Array that contains all io port definitions. note the array starts at 0 and ends at IOPORTS-1
+  {"X_min",0,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
+  {"X_plus",1,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
+  {"Y_plus",2,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS}};
+
+void init_io_ports()
+{
+  for (int i=0;i<IOPORTS;i++)                          // for each io port
+  {
+    pinMode( io_ports[i].PortNr, io_ports[i].Mode);   // set the mode
+  }
+}
+
 
 int X_min = 0;
 int X_plus = 1;
@@ -28,6 +61,8 @@ unsigned long debounceDelay = 50;    // the debounce time; increase if the outpu
 
 void setup() {
   Serial.begin(9600);
+   init_io_ports();       // initialize all io ports
+  
   pinMode( X_min, INPUT_PULLUP);
   pinMode( X_plus, INPUT_PULLUP);
   pinMode( Y_plus, INPUT_PULLUP);
