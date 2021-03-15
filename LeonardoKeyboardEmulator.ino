@@ -11,18 +11,32 @@ struct io_port_t {
 
 // define constants that are used in the program, makes changes easier
 #define DEFAULT_DEBOUNCE_TICS 100                     // default debounce tics
-#define IOPORTS 3                                     // the number of io ports to initialize
- 
-io_port_t test_port={"X_min",0,INPUT_PULLUP};         // showing how to define a variable structure
+#define IOPORTS 18                                    // the number of io ports to initialize
 
 // define the io ports to initialze and use, put them in an array that is easier to maintain
-// currently 3 io ports are defined
+// currently 18 io ports are defined
 
 // create an array that holds the io ports
 io_port_t io_ports[IOPORTS]={                         // Array that contains all io port definitions. note the array starts at 0 and ends at IOPORTS-1
   {"X_min",0,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
   {"X_plus",1,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
-  {"Y_plus",2,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS}};
+  {"Y_plus",2,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
+  {"Y_min",3,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
+  {"Z_plus",4,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
+  {"Z_min",5,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS}, 
+  {"A_plus",6,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
+  {"A_min",7,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},   
+  {"ctrl",8,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
+  {"shift",9,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
+  {"Jog_cont",10,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
+  {"Jog_001",11,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
+  {"Jog_01",12,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
+  {"Jog_1",13,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},    
+  {"Home",A2,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
+  {"Reset",A3,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
+  {"Main_Auto",A4,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
+  {"Mdi",A5,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS}
+  };
 
 void init_io_ports()
 {
@@ -31,7 +45,6 @@ void init_io_ports()
     pinMode( io_ports[i].PortNr, io_ports[i].Mode);   // set the mode
   }
 }
-
 
 int X_min = 0;
 int X_plus = 1;
@@ -62,26 +75,6 @@ unsigned long debounceDelay = 50;    // the debounce time; increase if the outpu
 void setup() {
   Serial.begin(9600);
    init_io_ports();       // initialize all io ports
-  
-  pinMode( X_min, INPUT_PULLUP);
-  pinMode( X_plus, INPUT_PULLUP);
-  pinMode( Y_plus, INPUT_PULLUP);
-  pinMode( Y_min, INPUT_PULLUP);
-  pinMode( Z_plus, INPUT_PULLUP);
-  pinMode( Z_min, INPUT_PULLUP);
-  pinMode( A_plus, INPUT_PULLUP);
-  pinMode( A_min, INPUT_PULLUP);
-  pinMode( ctrl, INPUT_PULLUP);
-  pinMode( shift, INPUT_PULLUP);
-  pinMode( Jog_cont, INPUT_PULLUP);
-  pinMode( Jog_001, INPUT_PULLUP);
-  pinMode( Jog_01, INPUT_PULLUP);
-  pinMode( Jog_1, INPUT_PULLUP);
-  pinMode( Home, INPUT_PULLUP);
-  pinMode( Reset, INPUT_PULLUP);
-  pinMode( Main_Auto, INPUT_PULLUP);
-  pinMode( Mdi, INPUT_PULLUP);
-
   Keyboard.begin();
 }
 
