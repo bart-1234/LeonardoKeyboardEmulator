@@ -75,7 +75,6 @@ unsigned long debounceDelay = 50;    // the debounce time; increase if the outpu
 void setup() {
   Serial.begin(9600);
    init_io_ports();       // initialize all io ports
-
   Keyboard.begin();
 }
 
