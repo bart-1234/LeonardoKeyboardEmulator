@@ -17,33 +17,39 @@ struct io_port_t {
 // currently 18 io ports are defined
 
 // create an array that holds the io ports
-io_port_t io_ports[IOPORTS]={                         // Array that contains all io port definitions. note the array starts at 0 and ends at IOPORTS-1
-  {"X_min",0,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
-  {"X_plus",1,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
-  {"Y_plus",2,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
-  {"Y_min",3,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
-  {"Z_plus",4,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
-  {"Z_min",5,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS}, 
-  {"A_plus",6,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
-  {"A_min",7,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},   
-  {"ctrl",8,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
-  {"shift",9,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
-  {"Jog_cont",10,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
-  {"Jog_001",11,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
-  {"Jog_01",12,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
-  {"Jog_1",13,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},    
-  {"Home",A2,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
-  {"Reset",A3,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
-  {"Main_Auto",A4,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS},
-  {"Mdi",A5,INPUT_PULLUP,DEFAULT_DEBOUNCE_TICS}
-  };
+io_port_t io_ports[IOPORTS] = {                       // Array that contains all io port definitions. note the array starts at 0 and ends at IOPORTS-1
+  {"X_min", 0, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"X_plus", 1, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"Y_plus", 2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"Y_min", 3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"Z_plus", 4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"Z_min", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"A_plus", 6, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"A_min", 7, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"ctrl", 8, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"shift", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"Jog_cont", 10, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"Jog_001", 11, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"Jog_01", 12, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"Jog_1", 13, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"Home", A2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"Reset", A3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"Main_Auto", A4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"Mdi", A5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS}
+};
 
+// initialize the ports
 void init_io_ports()
 {
-  for (int i=0;i<IOPORTS;i++)                          // for each io port
+  for (int i = 0; i < IOPORTS; i++)                    // for each io port
   {
     pinMode( io_ports[i].PortNr, io_ports[i].Mode);   // set the mode
   }
+}
+
+// return the state of a port
+bool get_port_state(io_port_t *io_port) {
+  return digitalRead(io_port->PortNr);
 }
 
 int X_min = 0;
@@ -74,12 +80,22 @@ unsigned long debounceDelay = 50;    // the debounce time; increase if the outpu
 
 void setup() {
   Serial.begin(9600);
-   init_io_ports();       // initialize all io ports
+  init_io_ports();       // initialize all io ports
   Keyboard.begin();
 }
 
 void loop() {
   // next commands are controlled by the JOG joysticks.
+
+  //Arrow Left. new method
+  // get the state of the first port by suppling the port as a parameter. The parameter is send as a pointer (link) because that is more efficent than sending the complete structure
+  if (get_port_state(&io_ports[0]) == LOW) {
+    Keyboard.press(0xD8);
+  }
+  if (get_port_state(&io_ports[0]) == HIGH) {
+    Keyboard.release(0xD8);
+  }
+
 
   //Arrow Left.
   if (digitalRead(X_min) == LOW) {
