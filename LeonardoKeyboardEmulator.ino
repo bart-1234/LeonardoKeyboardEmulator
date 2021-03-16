@@ -96,6 +96,21 @@ void loop() {
     Keyboard.release(0xD8);
   }
 
+  //Arrow Right. new method
+  if (get_port_state(&io_ports[1]) == LOW) {
+    Keyboard.press(0xD7);
+  }
+  if (get_port_state(&io_ports[1]) == HIGH) {
+    Keyboard.release(0xD7);
+  }
+   
+  //Arrow Up. new method
+  if (get_port_state(&io_ports[2]) == LOW) {
+    Keyboard.press(0xDA);
+  }
+  if (get_port_state(&io_ports[2]) == HIGH) {
+    Keyboard.release(0xDA);
+  }
 
   //Arrow Left.
   if (digitalRead(X_min) == LOW) {
