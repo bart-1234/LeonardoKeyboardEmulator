@@ -7,7 +7,7 @@ struct io_port_t {
   int PortNr;
   int Mode;
   int DebounceTics;
-  char KeyPress;
+  char Key;
 } ;
 
 // define constants that are used in the program, makes changes easier
@@ -53,8 +53,8 @@ bool get_port_state(io_port_t *io_port) {
   return digitalRead(io_port->PortNr);
 }
 
-char get_keyboard_input(io_port_t *Keyinput) {
-  return (Keyinput->KeyPress);  
+char get_keyboard_input(io_port_t *io_port) {
+  return (io_port->Key);  
 }
 
 int X_min = 0;
