@@ -7,6 +7,7 @@ struct io_port_t {
   int PortNr;
   int Mode;
   int DebounceTics;
+  char KeyPress;
 } ;
 
 // define constants that are used in the program, makes changes easier
@@ -18,7 +19,7 @@ struct io_port_t {
 
 // create an array that holds the io ports
 io_port_t io_ports[IOPORTS] = {                       // Array that contains all io port definitions. note the array starts at 0 and ends at IOPORTS-1
-  {"X_min", 0, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"X_min", 0, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, "0xD8"},
   {"X_plus", 1, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
   {"Y_plus", 2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
   {"Y_min", 3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
@@ -50,6 +51,10 @@ void init_io_ports()
 // return the state of a port
 bool get_port_state(io_port_t *io_port) {
   return digitalRead(io_port->PortNr);
+}
+
+char get_keyboard_input(io_port_t *Keyinput) {
+  return (Keyinput->KeyPress);  
 }
 
 int X_min = 0;
@@ -90,10 +95,10 @@ void loop() {
   //Arrow Left. new method
   // get the state of the first port by suppling the port as a parameter. The parameter is send as a pointer (link) because that is more efficent than sending the complete structure
   if (get_port_state(&io_ports[0]) == LOW) {
-    Keyboard.press(0xD8);
+    Keyboard.press(get_keyboard_input(&io_ports[0]));
   }
   if (get_port_state(&io_ports[0]) == HIGH) {
-    Keyboard.release(0xD8);
+    Keyboard.release(get_keyboard_input(&io_ports[0]));
   }
 
   //Arrow Right. new method
