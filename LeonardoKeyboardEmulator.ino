@@ -106,7 +106,9 @@ void setup() {
 
 void loop() {
   // next commands are controlled by the JOG joysticks.
-
+  
+  process_char_command_ports();
+  
   //  //Arrow Left. new method
   //  // get the state of the first port by suppling the port as a parameter. The parameter is send as a pointer (link) because that is more efficent than sending the complete structure
   //  if (get_port_state(&io_ports[0]) == LOW) {
