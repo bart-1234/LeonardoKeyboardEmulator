@@ -3,40 +3,42 @@
 #include <Keyboard.h>
 
 struct io_port_t {
-  String ID;
+  String Key;
+  String Command;
   int PortNr;
   int Mode;
   int DebounceTics;
-  char Key;
+  char command_char;
+  String command_string;
 } ;
 
 // define constants that are used in the program, makes changes easier
 #define DEFAULT_DEBOUNCE_TICS 100                     // default debounce tics
 #define IOPORTS 18                                    // the number of io ports to initialize
-
+#define CHARPORTS 3                                   // the number of ports that require a simple char   
 // define the io ports to initialze and use, put them in an array that is easier to maintain
 // currently 18 io ports are defined
 
 // create an array that holds the io ports
 io_port_t io_ports[IOPORTS] = {                       // Array that contains all io port definitions. note the array starts at 0 and ends at IOPORTS-1
-  {"X_min", 0, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, "0xD8"},
-  {"X_plus", 1, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
-  {"Y_plus", 2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
-  {"Y_min", 3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
-  {"Z_plus", 4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
-  {"Z_min", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
-  {"A_plus", 6, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
-  {"A_min", 7, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
-  {"ctrl", 8, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
-  {"shift", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
-  {"Jog_cont", 10, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
-  {"Jog_001", 11, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
-  {"Jog_01", 12, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
-  {"Jog_1", 13, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
-  {"Home", A2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
-  {"Reset", A3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
-  {"Main_Auto", A4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
-  {"Mdi", A5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS}
+  {"Arrow Left", "X_min", 0, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, "0xD8"},
+  {"", "X_plus", 1, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"", "Y_plus", 2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"", "Y_min", 3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"", "Z_plus", 4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"", "Z_min", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"", "A_plus", 6, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"", "A_min", 7, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"", "ctrl", 8, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"", "shift", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"", "Jog_cont", 10, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"", "Jog_001", 11, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"", "Jog_01", 12, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"", "Jog_1", 13, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"", "Home", A2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"", "Reset", A3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"", "Main_Auto", A4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"", "Mdi", A5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS}
 };
 
 // initialize the ports
@@ -54,12 +56,25 @@ bool get_port_state(io_port_t *io_port) {
 }
 
 char get_keyboard_input(io_port_t *io_port) {
-  return (io_port->Key);  
+  return (io_port->command_char);
 }
 
-int X_min = 0;
-int X_plus = 1;
-int Y_plus = 2;
+// process the char command ports
+void process_char_command_ports()
+{
+  for (int i = 0; i < CHARPORTS; i++)                    // for each io port that requires a simple char
+  {
+    if (get_port_state(&io_ports[i]) == LOW) {
+      Keyboard.press(get_keyboard_input(&io_ports[i]));
+    }
+    if (get_port_state(&io_ports[i]) == HIGH) {
+      Keyboard.release(get_keyboard_input(&io_ports[i]));
+    }
+  }
+}
+//int X_min = 0;
+//int X_plus = 1;
+//int Y_plus = 2;
 int Y_min = 3;
 int Z_plus = 4;
 int Z_min = 5;
@@ -92,52 +107,53 @@ void setup() {
 void loop() {
   // next commands are controlled by the JOG joysticks.
 
-  //Arrow Left. new method
-  // get the state of the first port by suppling the port as a parameter. The parameter is send as a pointer (link) because that is more efficent than sending the complete structure
-  if (get_port_state(&io_ports[0]) == LOW) {
-    Keyboard.press(get_keyboard_input(&io_ports[0]));
-  }
-  if (get_port_state(&io_ports[0]) == HIGH) {
-    Keyboard.release(get_keyboard_input(&io_ports[0]));
-  }
+  //  //Arrow Left. new method
+  //  // get the state of the first port by suppling the port as a parameter. The parameter is send as a pointer (link) because that is more efficent than sending the complete structure
+  //  if (get_port_state(&io_ports[0]) == LOW) {
+  //    Keyboard.press(get_keyboard_input(&io_ports[0]));
+  //  }
+  //  if (get_port_state(&io_ports[0]) == HIGH) {
+  //    Keyboard.release(get_keyboard_input(&io_ports[0]));
+  //  }
+  //
+  //  //Arrow Right. new method
+  //  if (get_port_state(&io_ports[1]) == LOW) {
+  //    Keyboard.press(0xD7);
+  //  }
+  //  if (get_port_state(&io_ports[1]) == HIGH) {
+  //    Keyboard.release(0xD7);
+  //  }
+  //
+  //  //Arrow Up. new method
+  //  if (get_port_state(&io_ports[2]) == LOW) {
+  //    Keyboard.press(0xDA);
+  //  }
+  //  if (get_port_state(&io_ports[2]) == HIGH) {
+  //    Keyboard.release(0xDA);
+  //  }
 
-  //Arrow Right. new method
-  if (get_port_state(&io_ports[1]) == LOW) {
-    Keyboard.press(0xD7);
-  }
-  if (get_port_state(&io_ports[1]) == HIGH) {
-    Keyboard.release(0xD7);
-  }
-   
-  //Arrow Up. new method
-  if (get_port_state(&io_ports[2]) == LOW) {
-    Keyboard.press(0xDA);
-  }
-  if (get_port_state(&io_ports[2]) == HIGH) {
-    Keyboard.release(0xDA);
-  }
+  //  //Arrow Left.
+  //  if (digitalRead(X_min) == LOW) {
+  //    Keyboard.press(0xD8);
+  //  }
+  //  if (digitalRead(X_min) == HIGH) {
+  //    Keyboard.release(0xD8);
+  //  }
+  //  //Arrow Right.
+  //  if (digitalRead(X_plus) == LOW) {
+  //    Keyboard.press(0xD7);
+  //  }
+  //  if (digitalRead(X_plus) == HIGH) {
+  //    Keyboard.release(0xD7);
+  //  }
+  //  //Arrow Up.
+  //  if (digitalRead(Y_plus) == LOW) {
+  //    Keyboard.press(0xDA);
+  //  }
+  //  if (digitalRead(Y_plus) == HIGH) {
+  //    Keyboard.release(0xDA);
+  //  }
 
-//  //Arrow Left.
-//  if (digitalRead(X_min) == LOW) {
-//    Keyboard.press(0xD8);
-//  }
-//  if (digitalRead(X_min) == HIGH) {
-//    Keyboard.release(0xD8);
-//  }
-//  //Arrow Right.
-//  if (digitalRead(X_plus) == LOW) {
-//    Keyboard.press(0xD7);
-//  }
-//  if (digitalRead(X_plus) == HIGH) {
-//    Keyboard.release(0xD7);
-//  }
-//  //Arrow Up.
-//  if (digitalRead(Y_plus) == LOW) {
-//    Keyboard.press(0xDA);
-//  }
-//  if (digitalRead(Y_plus) == HIGH) {
-//    Keyboard.release(0xDA);
-//  }
   //Arrow Down.
   if (digitalRead(Y_min) == LOW) {
     Keyboard.press(0xD9);
