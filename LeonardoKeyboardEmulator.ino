@@ -117,27 +117,27 @@ void loop() {
     Keyboard.release(0xDA);
   }
 
-  //Arrow Left.
-  if (digitalRead(X_min) == LOW) {
-    Keyboard.press(0xD8);
-  }
-  if (digitalRead(X_min) == HIGH) {
-    Keyboard.release(0xD8);
-  }
-  //Arrow Right.
-  if (digitalRead(X_plus) == LOW) {
-    Keyboard.press(0xD7);
-  }
-  if (digitalRead(X_plus) == HIGH) {
-    Keyboard.release(0xD7);
-  }
-  //Arrow Up.
-  if (digitalRead(Y_plus) == LOW) {
-    Keyboard.press(0xDA);
-  }
-  if (digitalRead(Y_plus) == HIGH) {
-    Keyboard.release(0xDA);
-  }
+//  //Arrow Left.
+//  if (digitalRead(X_min) == LOW) {
+//    Keyboard.press(0xD8);
+//  }
+//  if (digitalRead(X_min) == HIGH) {
+//    Keyboard.release(0xD8);
+//  }
+//  //Arrow Right.
+//  if (digitalRead(X_plus) == LOW) {
+//    Keyboard.press(0xD7);
+//  }
+//  if (digitalRead(X_plus) == HIGH) {
+//    Keyboard.release(0xD7);
+//  }
+//  //Arrow Up.
+//  if (digitalRead(Y_plus) == LOW) {
+//    Keyboard.press(0xDA);
+//  }
+//  if (digitalRead(Y_plus) == HIGH) {
+//    Keyboard.release(0xDA);
+//  }
   //Arrow Down.
   if (digitalRead(Y_min) == LOW) {
     Keyboard.press(0xD9);
