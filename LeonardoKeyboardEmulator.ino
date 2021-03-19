@@ -2,6 +2,10 @@
 
 #include <Keyboard.h>
 
+struct io_port_t;                                         // The structure that holds all port information is announced here and defined later.
+typedef void (*process_key_pointer)(io_port_t *io_port);  // A type definition for a pointer to the code that has to handel the processing of the key.
+void process_char_command_port(io_port_t *io_port);       // The code to process a simple char key is announced here and defined later.
+
 struct io_port_t {
   String Key;
   String Command;
@@ -10,27 +14,27 @@ struct io_port_t {
   int DebounceTics;
   char command_char;
   String command_string;
+  process_key_pointer process_key; // A pointer to the code that has to handel the processing of the key
 } ;
 
 // define constants that are used in the program, makes changes easier
 #define DEFAULT_DEBOUNCE_TICS 100                     // default debounce tics
 #define IOPORTS 18                                    // the number of io ports to initialize
-#define CHARPORTS 10                                   // the number of ports that require a simple char   
 // define the io ports to initialze and use, put them in an array that is easier to maintain
 // currently 18 io ports are defined
 
 // create an array that holds the io ports
 io_port_t io_ports[IOPORTS] = {                       // Array that contains all io port definitions. note the array starts at 0 and ends at IOPORTS-1
-  {"Arrow Left", "X_min", 0, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD8},
-  {"Arrow Right", "X_plus", 1, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD7},
-  {"Arrow Up", "Y_plus", 2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xDA},
-  {"Arrow Down", "Y_min", 3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD9},
-  {"Page Up", "Z_plus", 4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD3},
-  {"Page Down", "Z_min", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD6},
-  {"Home", "A_plus", 6, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD2},
-  {"End", "A_min", 7, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD5},
-  {"Ctrl", "ctrl", 8, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80},
-  {"Shift", "shift", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x81},
+  {"Arrow Left", "X_min", 0, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD8, "", &process_char_command_port},
+  {"Arrow Right", "X_plus", 1, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD7, "", &process_char_command_port},
+  {"Arrow Up", "Y_plus", 2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xDA, "", &process_char_command_port},
+  {"Arrow Down", "Y_min", 3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD9, "", &process_char_command_port},
+  {"Page Up", "Z_plus", 4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD3, "", &process_char_command_port},
+  {"Page Down", "Z_min", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD6, "", &process_char_command_port},
+  {"Home", "A_plus", 6, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD2, "", &process_char_command_port},
+  {"End", "A_min", 7, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD5, "", &process_char_command_port},
+  {"Ctrl", "ctrl", 8, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, "", &process_char_command_port},
+  {"Shift", "shift", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x81, "", &process_char_command_port},
   {"", "Jog_cont", 10, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
   {"", "Jog_001", 11, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
   {"", "Jog_01", 12, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
@@ -59,18 +63,22 @@ char get_keyboard_input(io_port_t *io_port) {
   return (io_port->command_char);
 }
 
-// process the char command ports
+// process a char command port
+void process_char_command_port(io_port_t *io_port) {
+  if (get_port_state(io_port) == LOW) {
+    Keyboard.press(get_keyboard_input(io_port));
+  }
+  if (get_port_state(io_port) == HIGH) {
+    Keyboard.release(get_keyboard_input(io_port));
+  }
+}
+
+// process the command ports
 void process_char_command_ports()
 {
-  for (int i = 0; i < CHARPORTS; i++)                    // for each io port that requires a simple char
-  {
-    if (get_port_state(&io_ports[i]) == LOW) {
-      Keyboard.press(get_keyboard_input(&io_ports[i]));
-    }
-    if (get_port_state(&io_ports[i]) == HIGH) {
-      Keyboard.release(get_keyboard_input(&io_ports[i]));
-    }
-  }
+  for (int i = 0; i < IOPORTS; i++)                       // for each io port 
+    if (io_ports[i].process_key != NULL)                  // If there is a processing procedure defined
+      io_ports[i].process_key(&io_ports[i]);              // Use the specified procedure to process the port
 }
 
 int Jog_cont = 10;
@@ -97,9 +105,9 @@ void setup() {
 
 void loop() {
   // next commands are controlled by the JOG joysticks.
-  
+
   process_char_command_ports();
-  
+
   // Next commands define the JOG steps.
   //Ctrl+Shift+N
   if (digitalRead(Jog_cont) == LOW) {
