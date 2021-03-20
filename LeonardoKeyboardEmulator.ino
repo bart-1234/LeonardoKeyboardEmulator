@@ -13,7 +13,9 @@ struct io_port_t {
   int Mode;
   int DebounceTics;
   char command_char;
-  String command_string;
+  char command_char2;
+  char command_char3;
+  char command_char4;
   process_key_pointer process_key; // A pointer to the code that has to handel the processing of the key
 } ;
 
@@ -25,24 +27,24 @@ struct io_port_t {
 
 // create an array that holds the io ports
 io_port_t io_ports[IOPORTS] = {                       // Array that contains all io port definitions. note the array starts at 0 and ends at IOPORTS-1
-  {"Arrow Left", "X_min", 0, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD8, "", &process_char_command_port},
-  {"Arrow Right", "X_plus", 1, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD7, "", &process_char_command_port},
-  {"Arrow Up", "Y_plus", 2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xDA, "", &process_char_command_port},
-  {"Arrow Down", "Y_min", 3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD9, "", &process_char_command_port},
-  {"Page Up", "Z_plus", 4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD3, "", &process_char_command_port},
-  {"Page Down", "Z_min", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD6, "", &process_char_command_port},
-  {"Home", "A_plus", 6, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD2, "", &process_char_command_port},
-  {"End", "A_min", 7, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD5, "", &process_char_command_port},
-  {"Ctrl", "ctrl", 8, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, "", &process_char_command_port},
-  {"Shift", "shift", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x81, "", &process_char_command_port},
-  {"", "Jog_cont", 10, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
-  {"", "Jog_001", 11, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
-  {"", "Jog_01", 12, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
-  {"", "Jog_1", 13, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
-  {"", "Home", A2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
-  {"", "Reset", A3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
-  {"", "Main_Auto", A4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
-  {"", "Mdi", A5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS}
+  {"Arrow Left", "X_min", 0, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD8, 0xD8, 0xD8, 0xD8, &process_char_command_port},
+  {"Arrow Right", "X_plus", 1, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD7, 0xD7, 0xD7, 0xD7, &process_char_command_port},
+  {"Arrow Up", "Y_plus", 2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xDA, 0xDA, 0xDA, 0xDA, &process_char_command_port},
+  {"Arrow Down", "Y_min", 3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD9, 0xD9, 0xD9, 0xD9, &process_char_command_port},
+  {"Page Up", "Z_plus", 4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD3, 0xD3, 0xD3, 0xD3, &process_char_command_port},
+  {"Page Down", "Z_min", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD6, 0xD6, 0xD6, 0xD6, &process_char_command_port},
+  {"Home", "A_plus", 6, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD2, 0xD2, 0xD2, 0xD2, &process_char_command_port},
+  {"End", "A_min", 7, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD5, 0xD5, 0xD5, 0xD5, &process_char_command_port},
+  {"Ctrl", "ctrl", 8, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x80, 0x80, 0x80, &process_char_command_port},
+  {"Shift", "shift", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x81, 0x81, 0x81, 0x81, &process_char_command_port},
+  {"Continuous Jog", "Jog_cont", 10, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x80, 0x81, 'n', &process_char_command_port},
+  {"Jog step 0.01", "Jog_001", 11, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x82, 0x81, 'r', &process_char_command_port},
+  {"Jog step 0.1", "Jog_01", 12, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x82, 0x81, 's', &process_char_command_port},
+  {"Jog step 1", "Jog_1", 13, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x82, 0x81, 't', &process_char_command_port},
+  {"Home sequence", "Home", A2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x80, 0x80, 'h', &process_char_command_port},
+  {"Reset", "Reset", A3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x80, 0x80, 'r', &process_char_command_port},
+  {"Toggle Main Auto menu", "Main_Auto", A4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS},
+  {"Mdi Menu", "Mdi", A5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x80, 0x80, 0xC7, &process_char_command_port}
 };
 
 // initialize the ports
@@ -62,14 +64,29 @@ bool get_port_state(io_port_t *io_port) {
 char get_keyboard_input(io_port_t *io_port) {
   return (io_port->command_char);
 }
+char get_keyboard_input2(io_port_t *io_port) {
+  return (io_port->command_char2);
+}
+char get_keyboard_input3(io_port_t *io_port) {
+  return (io_port->command_char3);
+}
+char get_keyboard_input4(io_port_t *io_port) {
+  return (io_port->command_char4);
+}
 
 // process a char command port
 void process_char_command_port(io_port_t *io_port) {
   if (get_port_state(io_port) == LOW) {
     Keyboard.press(get_keyboard_input(io_port));
+    Keyboard.press(get_keyboard_input2(io_port));
+    Keyboard.press(get_keyboard_input3(io_port));
+    Keyboard.press(get_keyboard_input4(io_port));
   }
   if (get_port_state(io_port) == HIGH) {
     Keyboard.release(get_keyboard_input(io_port));
+    Keyboard.release(get_keyboard_input2(io_port));
+    Keyboard.release(get_keyboard_input3(io_port));
+    Keyboard.release(get_keyboard_input4(io_port));
   }
 }
 
@@ -81,14 +98,7 @@ void process_char_command_ports()
       io_ports[i].process_key(&io_ports[i]);              // Use the specified procedure to process the port
 }
 
-int Jog_cont = 10;
-int Jog_001 = 11;
-int Jog_01 = 12;
-int Jog_1 = 13;
-int Home = A2;
-int Reset = A3;
 int Main_Auto = A4;
-int Mdi = A5;
 
 uint8_t MainAutoKeyState = HIGH;           // the current state of the key's to send
 uint8_t MainAutoButtonState;             // the current reading from the input pin
@@ -108,59 +118,6 @@ void loop() {
 
   process_char_command_ports();
 
-  // Next commands define the JOG steps.
-  //Ctrl+Shift+N
-  if (digitalRead(Jog_cont) == LOW) {
-    Keyboard.press(0x80);
-    Keyboard.press(0x81);
-    Keyboard.press('N');
-    delay(100);
-    Keyboard.releaseAll();
-  }
-  //Ctrl+Alt+Shift+R
-  if (digitalRead(Jog_001) == LOW) {
-    Keyboard.press(0x80);
-    Keyboard.press(0x82);
-    Keyboard.press(0x81);
-    Keyboard.press('R');
-    delay(100);
-    Keyboard.releaseAll();
-  }
-  //Ctrl+Alt+Shift+S
-  if (digitalRead(Jog_01) == LOW) {
-    Keyboard.press(0x80);
-    Keyboard.press(0x82);
-    Keyboard.press(0x81);
-    Keyboard.press('S');
-    delay(100);
-    Keyboard.releaseAll();
-  }
-  //Ctrl+Alt+Shift+T
-  if (digitalRead(Jog_1) == LOW) {
-    Keyboard.press(0x80);
-    Keyboard.press(0x82);
-    Keyboard.press(0x81);
-    Keyboard.press('T');
-    delay(100);
-    Keyboard.releaseAll();
-  }
-
-  // Next command is used next to home all axis'.
-  //Ctrl+H
-  if (digitalRead(Home) == LOW) {
-    Keyboard.press(0x80);
-    Keyboard.press('h');
-    delay(100);
-    Keyboard.releaseAll();
-  }
-  // Next commands are used next to the screen'.
-  //Ctrl+R
-  if (digitalRead(Reset) == LOW) {
-    Keyboard.press(0x80);
-    Keyboard.press('r');
-    delay(100);
-    Keyboard.releaseAll();
-  }
   //Toggle between Main and Auto menu.
   uint8_t reading = digitalRead(Main_Auto);
   if (reading != MainAutoLastButtonState) {
@@ -195,12 +152,4 @@ void loop() {
     }
   }
   MainAutoLastButtonState = reading;
-
-  //Ctrl+F6
-  if (digitalRead(Mdi) == LOW) {
-    Keyboard.press(0x80);
-    Keyboard.press(0xC7);
-    delay(100);
-    Keyboard.releaseAll();
-  }
 }
