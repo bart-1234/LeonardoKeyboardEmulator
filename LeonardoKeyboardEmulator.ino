@@ -27,7 +27,7 @@ struct io_port_t {
 
 // create an array that holds the io ports
 io_port_t io_ports[IOPORTS] = {                       // Array that contains all io port definitions. note the array starts at 0 and ends at IOPORTS-1
-  {"Arrow Left", "X_min", 0, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD8, 0xD8, 0xD8, 0xD8, &process_char_command_port},
+  {"Arrow Left", "X_min", 0, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD8,,,, &process_char_command_port},
   {"Arrow Right", "X_plus", 1, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD7, 0xD7, 0xD7, 0xD7, &process_char_command_port},
   {"Arrow Up", "Y_plus", 2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xDA, 0xDA, 0xDA, 0xDA, &process_char_command_port},
   {"Arrow Down", "Y_min", 3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD9, 0xD9, 0xD9, 0xD9, &process_char_command_port},
