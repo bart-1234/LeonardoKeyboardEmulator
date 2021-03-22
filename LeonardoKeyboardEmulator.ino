@@ -64,18 +64,18 @@ bool get_port_state(io_port_t *io_port) {
   return digitalRead(io_port->PortNr);
 }
 
-char get_keyboard_input(io_port_t *io_port) {
-  return (io_port->command_char);
-}
-char get_keyboard_input2(io_port_t *io_port) {
-  return (io_port->command_char2);
-}
-char get_keyboard_input3(io_port_t *io_port) {
-  return (io_port->command_char3);
-}
-char get_keyboard_input4(io_port_t *io_port) {
-  return (io_port->command_char4);
-}
+//char get_keyboard_input(io_port_t *io_port) {
+//  return (io_port->command_char);
+//}
+//char get_keyboard_input2(io_port_t *io_port) {
+//  return (io_port->command_char2);
+//}
+//char get_keyboard_input3(io_port_t *io_port) {
+//  return (io_port->command_char3);
+//}
+//char get_keyboard_input4(io_port_t *io_port) {
+//  return (io_port->command_char4);
+//}
 
 // process a char command port
 void process_char_command_port(io_port_t *io_port) {
@@ -87,13 +87,26 @@ void process_char_command_port(io_port_t *io_port) {
   }
 }
 
+
+// old version
+//  // Next command is used next to home all axis'.
+//  //Ctrl+H
+//  if (digitalRead(Home) == LOW) {
+//    Keyboard.press(0x80);
+//    Keyboard.press('h');
+//    delay(100);
+//    Keyboard.releaseAll();
+//  }
+  
 // process a double command port
 void process_double_command_port(io_port_t *io_port) {
   if (get_port_state(io_port) == LOW) {
+    Keyboard.press(io_port->command_char);
     Keyboard.press(io_port->command_char2);
+    delay(100);  // I think this may be deleted, should be tested
   }
-  if (get_port_state(io_port) == HIGH) {
-    Keyboard.release(io_port->command_char2);
+  if (get_port_state(io_port) == HIGH) {    
+    Keyboard.releaseAll();
   }
 }
 
