@@ -80,10 +80,10 @@ char get_keyboard_input4(io_port_t *io_port) {
 // process a char command port
 void process_char_command_port(io_port_t *io_port) {
   if (get_port_state(io_port) == LOW) {
-    Keyboard.press(get_keyboard_input(io_port));
+    Keyboard.press(io_port->command_char);
   }
   if (get_port_state(io_port) == HIGH) {
-    Keyboard.release(get_keyboard_input(io_port));
+    Keyboard.release(io_port->command_char);
   }
 }
 
