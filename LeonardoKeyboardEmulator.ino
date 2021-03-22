@@ -90,68 +90,36 @@ void process_char_command_port(io_port_t *io_port) {
 // process a double command port
 void process_double_command_port(io_port_t *io_port) {
   if (get_port_state(io_port) == LOW) {
-    Keyboard.press(get_keyboard_input(io_port));
-    Keyboard.press(get_keyboard_input2(io_port));
+    Keyboard.press(io_port->command_char2);
   }
   if (get_port_state(io_port) == HIGH) {
-    Keyboard.release(get_keyboard_input(io_port));
-    Keyboard.release(get_keyboard_input2(io_port));
+    Keyboard.release(io_port->command_char2);
   }
 }
 
 // process a triple command port
 void process_triple_command_port(io_port_t *io_port) {
   if (get_port_state(io_port) == LOW) {
-    Keyboard.press(get_keyboard_input(io_port));
-    Keyboard.press(get_keyboard_input2(io_port));
-    Keyboard.press(get_keyboard_input3(io_port));
+    Keyboard.press(io_port->command_char3);
   }
   if (get_port_state(io_port) == HIGH) {
-    Keyboard.release(get_keyboard_input(io_port));
-    Keyboard.release(get_keyboard_input2(io_port));
-    Keyboard.release(get_keyboard_input3(io_port));
+    Keyboard.release(io_port->command_char3);
   }
 }
 
 // process a quadruple command port
 void process_quadruple_command_port(io_port_t *io_port) {
   if (get_port_state(io_port) == LOW) {
-    Keyboard.press(get_keyboard_input(io_port));
-    Keyboard.press(get_keyboard_input2(io_port));
-    Keyboard.press(get_keyboard_input3(io_port));
-    Keyboard.press(get_keyboard_input4(io_port));
+    Keyboard.press(io_port->command_char4);
   }
   if (get_port_state(io_port) == HIGH) {
-    Keyboard.release(get_keyboard_input(io_port));
-    Keyboard.release(get_keyboard_input2(io_port));
-    Keyboard.release(get_keyboard_input3(io_port));
-    Keyboard.release(get_keyboard_input4(io_port));
+    Keyboard.release(io_port->command_char4);
+
   }
 }
 
 // process the command ports
-void process_char_command_ports()
-{
-  for (int i = 0; i < IOPORTS; i++)                       // for each io port
-    if (io_ports[i].process_key != NULL)                  // If there is a processing procedure defined
-      io_ports[i].process_key(&io_ports[i]);              // Use the specified procedure to process the port
-}
-
-void process_double_command_ports()
-{
-  for (int i = 0; i < IOPORTS; i++)                       // for each io port
-    if (io_ports[i].process_key != NULL)                  // If there is a processing procedure defined
-      io_ports[i].process_key(&io_ports[i]);              // Use the specified procedure to process the port
-}
-
-void process_triple_command_ports()
-{
-  for (int i = 0; i < IOPORTS; i++)                       // for each io port
-    if (io_ports[i].process_key != NULL)                  // If there is a processing procedure defined
-      io_ports[i].process_key(&io_ports[i]);              // Use the specified procedure to process the port
-}
-
-void process_quadruple_command_ports()
+void process_command_ports()
 {
   for (int i = 0; i < IOPORTS; i++)                       // for each io port
     if (io_ports[i].process_key != NULL)                  // If there is a processing procedure defined
@@ -176,10 +144,8 @@ void setup() {
 void loop() {
   // next commands are controlled by the JOG joysticks.
 
-  process_char_command_ports();
-  process_double_command_ports();
-  process_triple_command_ports();
-  process_quadruple_command_ports();
+  process_command_ports();
+
 
   //Toggle between Main and Auto menu.
   uint8_t reading = digitalRead(Main_Auto);
