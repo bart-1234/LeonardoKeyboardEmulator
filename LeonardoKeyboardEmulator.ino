@@ -5,32 +5,31 @@
 struct io_port_t;                                         // The structure that holds all port information is announced here and defined later.
 typedef void (*process_key_pointer)(io_port_t *io_port);  // A type definition for a pointer to the code that has to handel the processing of the key.
 void process_char_command_port(io_port_t *io_port);       // The code to process a simple char key is announced here and defined later.
-void process_double_command_port(io_port_t *io_port);
-void process_triple_command_port(io_port_t *io_port);
-void process_quadruple_command_port(io_port_t *io_port);
+void process_double_command_port(io_port_t *io_port);     // The code to process a double char key is announced here and defined later.
+void process_triple_command_port(io_port_t *io_port);     // The code to process a triple char key is announced here and defined later.
+void process_quadruple_command_port(io_port_t *io_port);  // The code to process a quadruple char key is announced here and defined later.
 
-struct io_port_t {
-  String Key;
-  String Command;
-  int PortNr;
-  int Mode;
-  int DebounceTics;
-  char command_char;
-  char command_char2;
-  char command_char3;
-  char command_char4;
+struct io_port_t {                 // The structure with it's members are defined here.
+  String Key;                      // Name of the key
+  String Command;                  // Command in Eding.
+  int PortNr;                      // Port on the Arduino
+  int Mode;                        // Port mode
+  int DebounceTics;                // Number of tics used to prevent boucning of the keys.
+  char command_char;               // First character
+  char command_char2;              // Second character
+  char command_char3;              // Third character
+  char command_char4;              // Fourth character
   process_key_pointer process_key; // A pointer to the code that has to handel the processing of the key
 } ;
 
 // define constants that are used in the program, makes changes easier
-#define DEFAULT_DEBOUNCE_TICS 100                     // default debounce tics
-#define IOPORTS 18                                    // the number of io ports to initialize
-// define the io ports to initialze and use, put them in an array that is easier to maintain
-// currently 18 io ports are defined
+#define DEFAULT_DEBOUNCE_TICS 100  // default debounce tics
+#define IOPORTS 18                 // the number of io ports to initialize
 
+// define the io ports to initialze and use, put them in an array that is easier to maintain
 // create an array that holds the io ports
 io_port_t io_ports[IOPORTS] = {                       // Array that contains all io port definitions. note the array starts at 0 and ends at IOPORTS-1
-  {"Arrow Left", "X_min", 0, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD8,0,0,0, &process_char_command_port},                   //single command
+  {"Arrow Left", "X_min", 0, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD8,0,0,0, &process_char_command_port},                      // Single command, "0" means no action.
   {"Arrow Right", "X_plus", 1, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD7,0,0,0, &process_char_command_port},
   {"Arrow Up", "Y_plus", 2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xDA,0,0,0, &process_char_command_port},
   {"Arrow Down", "Y_min", 3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD9,0,0,0, &process_char_command_port},
@@ -40,11 +39,11 @@ io_port_t io_ports[IOPORTS] = {                       // Array that contains all
   {"End", "A_min", 7, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD5,0,0,0, &process_char_command_port},
   {"Ctrl", "ctrl", 8, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80,0,0,0, &process_char_command_port},
   {"Shift", "shift", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x81,0,0,0, &process_char_command_port},
-  {"Continuous Jog", "Jog_cont", 10, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x81, 'n',0, &process_triple_command_port},  //Triple command
-  {"Jog step 0.01", "Jog_001", 11, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x82, 0x81, 'r', &process_quadruple_command_port},
+  {"Continuous Jog", "Jog_cont", 10, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x81, 'n',0, &process_triple_command_port},      // Triple command
+  {"Jog step 0.01", "Jog_001", 11, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x82, 0x81, 'r', &process_quadruple_command_port}, // Quadruple command
   {"Jog step 0.1", "Jog_01", 12, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x82, 0x81, 's', &process_quadruple_command_port},
   {"Jog step 1", "Jog_1", 13, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x82, 0x81, 't', &process_quadruple_command_port},
-  {"Home sequence", "Home", A2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 'h',0,0, &process_double_command_port},           //Double command
+  {"Home sequence", "Home", A2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 'h',0,0, &process_double_command_port},               // Double command
   {"Reset", "Reset", A3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 'r',0,0, &process_double_command_port},
   {"Toggle Main Auto menu", "Main_Auto", A4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0, 0, 0, 0, NULL},
   {"Mdi Menu", "Mdi", A5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0xC7,0,0, &process_double_command_port}
@@ -63,20 +62,6 @@ void init_io_ports()
 bool get_port_state(io_port_t *io_port) {
   return digitalRead(io_port->PortNr);
 }
-
-//char get_keyboard_input(io_port_t *io_port) {
-//  return (io_port->command_char);
-//}
-//char get_keyboard_input2(io_port_t *io_port) {
-//  return (io_port->command_char2);
-//}
-//char get_keyboard_input3(io_port_t *io_port) {
-//  return (io_port->command_char3);
-//}
-//char get_keyboard_input4(io_port_t *io_port) {
-//  return (io_port->command_char4);
-//}
-
 // process a char command port
 void process_char_command_port(io_port_t *io_port) {
   if (get_port_state(io_port) == LOW) {
@@ -86,24 +71,13 @@ void process_char_command_port(io_port_t *io_port) {
     Keyboard.release(io_port->command_char);
   }
 }
-
-
-// old version
-//  // Next command is used next to home all axis'.
-//  //Ctrl+H
-//  if (digitalRead(Home) == LOW) {
-//    Keyboard.press(0x80);
-//    Keyboard.press('h');
-//    delay(100);
-//    Keyboard.releaseAll();
-//  }
   
 // process a double command port
 void process_double_command_port(io_port_t *io_port) {
   if (get_port_state(io_port) == LOW) {
     Keyboard.press(io_port->command_char);
     Keyboard.press(io_port->command_char2);
-    delay(100);  
+    delay(100);
     Keyboard.releaseAll();
   }
 }
@@ -111,20 +85,23 @@ void process_double_command_port(io_port_t *io_port) {
 // process a triple command port
 void process_triple_command_port(io_port_t *io_port) {
   if (get_port_state(io_port) == LOW) {
+    Keyboard.press(io_port->command_char);
+    Keyboard.press(io_port->command_char2);
     Keyboard.press(io_port->command_char3);
-  }
-  if (get_port_state(io_port) == HIGH) {
-    Keyboard.release(io_port->command_char3);
+    delay(100);
+    Keyboard.releaseAll();
   }
 }
 
 // process a quadruple command port
 void process_quadruple_command_port(io_port_t *io_port) {
   if (get_port_state(io_port) == LOW) {
+    Keyboard.press(io_port->command_char);
+    Keyboard.press(io_port->command_char2);
+    Keyboard.press(io_port->command_char3);
     Keyboard.press(io_port->command_char4);
-  }
-  if (get_port_state(io_port) == HIGH) {
-    Keyboard.release(io_port->command_char4);
+    delay(100);
+    Keyboard.releaseAll();
 
   }
 }
@@ -153,8 +130,6 @@ void setup() {
 }
 
 void loop() {
-  // next commands are controlled by the JOG joysticks.
-
   process_command_ports();
 
 
