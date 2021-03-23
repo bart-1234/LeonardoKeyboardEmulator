@@ -9,6 +9,18 @@ void process_double_command_port(io_port_t *io_port);     // The code to process
 void process_triple_command_port(io_port_t *io_port);     // The code to process a triple char key is announced here and defined later.
 void process_quadruple_command_port(io_port_t *io_port);  // The code to process a quadruple char key is announced here and defined later.
 
+enum key_states_t{ // The states a key can have
+  key_state_U,  // Undefined
+  key_state_UA, // Undefined, changing to Active
+  key_state_A,  // Active
+  key_state_AP, // Active and Processed
+  key_state_UI, // Undefined, Changing to Inactive
+  key_state_I,  // Inactive
+  key_state_IP,  // Inactieve, Inactive and Processed
+  key_state_IA,  // Inactieve, changing to Active
+  key_state_AI,  // Actieve, changing to Inactive 
+  };   // The states a key can have
+  
 struct io_port_t {                 // The structure with it's members are defined here.
   String Key;                      // Name of the key
   String Command;                  // Command in Eding.
@@ -20,6 +32,9 @@ struct io_port_t {                 // The structure with it's members are define
   char command_char3;              // Third character
   char command_char4;              // Fourth character
   process_key_pointer process_key; // A pointer to the code that has to handel the processing of the key
+  
+  // all members after this line must be initialized outside the creation of the array io_ports
+  key_states_t key_state;          // The last know state of a key, must be set to Undefined at Initialisation
 } ;
 
 // define constants that are used in the program, makes changes easier
@@ -55,6 +70,7 @@ void init_io_ports()
   for (int i = 0; i < IOPORTS; i++)                    // for each io port
   {
     pinMode( io_ports[i].PortNr, io_ports[i].Mode);   // set the mode
+    io_ports[i].key_state=key_state_U;
   }
 }
 
