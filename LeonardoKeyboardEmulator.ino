@@ -74,10 +74,20 @@ void init_io_ports()
   }
 }
 
-// return the state of a port
-bool get_key_state(io_port_t *io_port) {
-  return (io_port->key_state);
+// return the state of a port. A port can be HIGH or LOW
+bool get_port_state(io_port_t *io_port) {    
+  return digitalRead(io_port->PortNr);
 }
+// This procedure is the workhorse of debouncing 
+// It returns the state of a key. 
+// The state of a key depends on the state of a port (HIGH or LOW), how  long is was in this state and many other things (when fully implemented).
+// For now, whe just return the port_state for testing       
+bool get_key_state(io_port_t *io_port) {
+  bool port_state=get_port_state(io_port);                                    
+  if (port_state==HIGH) return key_state_I;
+  else return key_state_A;
+}
+
 // process a char command port
 void process_char_command_port(io_port_t *io_port) {
   if (get_key_state(io_port) == key_state_A) {
