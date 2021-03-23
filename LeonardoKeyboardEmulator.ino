@@ -103,9 +103,7 @@ void process_double_command_port(io_port_t *io_port) {
   if (get_port_state(io_port) == LOW) {
     Keyboard.press(io_port->command_char);
     Keyboard.press(io_port->command_char2);
-    delay(100);  // I think this may be deleted, should be tested
-  }
-  if (get_port_state(io_port) == HIGH) {    
+    delay(100);  
     Keyboard.releaseAll();
   }
 }
