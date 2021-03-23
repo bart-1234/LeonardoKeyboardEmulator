@@ -75,22 +75,23 @@ void init_io_ports()
 }
 
 // return the state of a port
-bool get_port_state(io_port_t *io_port) {
-  return digitalRead(io_port->PortNr);
+bool get_key_state(io_port_t *io_port) {
+  return (io_port->key_state);
 }
 // process a char command port
 void process_char_command_port(io_port_t *io_port) {
-  if (get_port_state(io_port) == LOW) {
+  if (get_key_state(io_port) == key_state_A) {
     Keyboard.press(io_port->command_char);
   }
-  if (get_port_state(io_port) == HIGH) {
+  if (get_key_state(io_port) == key_state_I) {
     Keyboard.release(io_port->command_char);
   }
 }
   
 // process a double command port
+
 void process_double_command_port(io_port_t *io_port) {
-  if (get_port_state(io_port) == LOW) {
+  if (get_key_state(io_port) == key_state_A) {
     Keyboard.press(io_port->command_char);
     Keyboard.press(io_port->command_char2);
     delay(100);
@@ -100,7 +101,7 @@ void process_double_command_port(io_port_t *io_port) {
 
 // process a triple command port
 void process_triple_command_port(io_port_t *io_port) {
-  if (get_port_state(io_port) == LOW) {
+  if (get_key_state(io_port) == key_state_A) {
     Keyboard.press(io_port->command_char);
     Keyboard.press(io_port->command_char2);
     Keyboard.press(io_port->command_char3);
@@ -111,7 +112,7 @@ void process_triple_command_port(io_port_t *io_port) {
 
 // process a quadruple command port
 void process_quadruple_command_port(io_port_t *io_port) {
-  if (get_port_state(io_port) == LOW) {
+  if (get_key_state(io_port) == key_state_A) {
     Keyboard.press(io_port->command_char);
     Keyboard.press(io_port->command_char2);
     Keyboard.press(io_port->command_char3);
