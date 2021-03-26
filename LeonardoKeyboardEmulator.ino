@@ -9,7 +9,7 @@ void process_double_command_port(io_port_t *io_port);     // The code to process
 void process_triple_command_port(io_port_t *io_port);     // The code to process a triple char key is announced here and defined later.
 void process_quadruple_command_port(io_port_t *io_port);  // The code to process a quadruple char key is announced here and defined later.
 
-enum key_states_t{ // The states a key can have
+enum key_states_t { // The states a key can have
   key_state_U,  // Undefined
   key_state_UA, // Undefined, changing to Active
   key_state_A,  // Active
@@ -18,9 +18,9 @@ enum key_states_t{ // The states a key can have
   key_state_I,  // Inactive
   key_state_IP,  // Inactieve, Inactive and Processed
   key_state_IA,  // Inactieve, changing to Active
-  key_state_AI,  // Actieve, changing to Inactive 
-  };   // The states a key can have
-  
+  key_state_AI,  // Actieve, changing to Inactive
+};   // The states a key can have
+
 struct io_port_t {                 // The structure with it's members are defined here.
   String Key;                      // Name of the key
   String Command;                  // Command in Eding.
@@ -32,7 +32,7 @@ struct io_port_t {                 // The structure with it's members are define
   char command_char3;              // Third character
   char command_char4;              // Fourth character
   process_key_pointer process_key; // A pointer to the code that has to handel the processing of the key
-  
+
   // all members after this line must be initialized outside the creation of the array io_ports
   key_states_t key_state;          // The last know state of a key, must be set to Undefined at Initialisation
 } ;
@@ -44,24 +44,24 @@ struct io_port_t {                 // The structure with it's members are define
 // define the io ports to initialze and use, put them in an array that is easier to maintain
 // create an array that holds the io ports
 io_port_t io_ports[IOPORTS] = {                       // Array that contains all io port definitions. note the array starts at 0 and ends at IOPORTS-1
-  {"Arrow Left", "X_min", 0, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD8,0,0,0, &process_char_command_port},                      // Single command, "0" means no action.
-  {"Arrow Right", "X_plus", 1, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD7,0,0,0, &process_char_command_port},
-  {"Arrow Up", "Y_plus", 2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xDA,0,0,0, &process_char_command_port},
-  {"Arrow Down", "Y_min", 3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD9,0,0,0, &process_char_command_port},
-  {"Page Up", "Z_plus", 4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD3,0,0,0, &process_char_command_port},
-  {"Page Down", "Z_min", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD6,0,0,0, &process_char_command_port},     
-  {"Home", "A_plus", 6, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD2,0,0,0, &process_char_command_port},
-  {"End", "A_min", 7, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD5,0,0,0, &process_char_command_port},
-  {"Ctrl", "ctrl", 8, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80,0,0,0, &process_char_command_port},
-  {"Shift", "shift", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x81,0,0,0, &process_char_command_port},
-  {"Continuous Jog", "Jog_cont", 10, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x81, 'n',0, &process_triple_command_port},      // Triple command
+  {"Arrow Left", "X_min", 0, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD8, 0, 0, 0, &process_char_command_port},                   // Single command, "0" means no action.
+  {"Arrow Right", "X_plus", 1, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD7, 0, 0, 0, &process_char_command_port},
+  {"Arrow Up", "Y_plus", 2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xDA, 0, 0, 0, &process_char_command_port},
+  {"Arrow Down", "Y_min", 3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD9, 0, 0, 0, &process_char_command_port},
+  {"Page Up", "Z_plus", 4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD3, 0, 0, 0, &process_char_command_port},
+  {"Page Down", "Z_min", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD6, 0, 0, 0, &process_char_command_port},
+  {"Home", "A_plus", 6, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD2, 0, 0, 0, &process_char_command_port},
+  {"End", "A_min", 7, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD5, 0, 0, 0, &process_char_command_port},
+  {"Ctrl", "ctrl", 8, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0, 0, 0, &process_char_command_port},
+  {"Shift", "shift", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x81, 0, 0, 0, &process_char_command_port},
+  {"Continuous Jog", "Jog_cont", 10, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x81, 'n', 0, &process_triple_command_port},     // Triple command
   {"Jog step 0.01", "Jog_001", 11, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x82, 0x81, 'r', &process_quadruple_command_port}, // Quadruple command
   {"Jog step 0.1", "Jog_01", 12, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x82, 0x81, 's', &process_quadruple_command_port},
   {"Jog step 1", "Jog_1", 13, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x82, 0x81, 't', &process_quadruple_command_port},
-  {"Home sequence", "Home", A2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 'h',0,0, &process_double_command_port},               // Double command
-  {"Reset", "Reset", A3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 'r',0,0, &process_double_command_port},
+  {"Home sequence", "Home", A2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 'h', 0, 0, &process_double_command_port},             // Double command
+  {"Reset", "Reset", A3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 'r', 0, 0, &process_double_command_port},
   {"Toggle Main Auto menu", "Main_Auto", A4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0, 0, 0, 0, NULL},
-  {"Mdi Menu", "Mdi", A5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0xC7,0,0, &process_double_command_port}
+  {"Mdi Menu", "Mdi", A5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0xC7, 0, 0, &process_double_command_port}
 };
 
 // initialize the ports
@@ -70,21 +70,22 @@ void init_io_ports()
   for (int i = 0; i < IOPORTS; i++)                    // for each io port
   {
     pinMode( io_ports[i].PortNr, io_ports[i].Mode);   // set the mode
-    io_ports[i].key_state=key_state_U;
+    io_ports[i].key_state = key_state_U;
   }
 }
 
-// return the state of a port. A port can be HIGH or LOW
-bool get_port_state(io_port_t *io_port) {    
+// return the state of a port
+bool get_port_state(io_port_t *io_port) {
   return digitalRead(io_port->PortNr);
 }
-// This procedure is the workhorse of debouncing 
-// It returns the state of a key. 
-// The state of a key depends on the state of a port (HIGH or LOW), how  long is was in this state and many other things (when fully implemented).
-// For now, whe just return the port_state for testing       
-bool get_key_state(io_port_t *io_port) {
-  bool port_state=get_port_state(io_port);                                    
-  if (port_state==HIGH) return key_state_I;
+
+// This procedure is the workhorse of debouncing
+// It returns the state of a key.
+// The state of a key depends on the state of the port (HIGH or LOW), how  long is was in this state and many other things (when fully implemented).
+// For now, whe just return the port_state for testing
+key_states_t get_key_state(io_port_t *io_port) {
+  bool port_state = get_port_state(io_port);
+  if (port_state == HIGH) return key_state_I;
   else return key_state_A;
 }
 
@@ -97,39 +98,40 @@ void process_char_command_port(io_port_t *io_port) {
     Keyboard.release(io_port->command_char);
   }
 }
-  
-// process a double command port
 
+// process a double command port
 void process_double_command_port(io_port_t *io_port) {
-  if (get_key_state(io_port) == key_state_A) {
+  if (get_port_state(io_port) == LOW) {
     Keyboard.press(io_port->command_char);
     Keyboard.press(io_port->command_char2);
-    delay(100);
+  }
+  if (get_port_state(io_port) == HIGH) {
     Keyboard.releaseAll();
   }
 }
 
 // process a triple command port
 void process_triple_command_port(io_port_t *io_port) {
-  if (get_key_state(io_port) == key_state_A) {
+  if (get_port_state(io_port) == LOW) {
     Keyboard.press(io_port->command_char);
     Keyboard.press(io_port->command_char2);
     Keyboard.press(io_port->command_char3);
-    delay(100);
+  }
+  if (get_port_state(io_port) == HIGH) {
     Keyboard.releaseAll();
   }
 }
 
 // process a quadruple command port
 void process_quadruple_command_port(io_port_t *io_port) {
-  if (get_key_state(io_port) == key_state_A) {
+  if (get_port_state(io_port) == LOW) {
     Keyboard.press(io_port->command_char);
     Keyboard.press(io_port->command_char2);
     Keyboard.press(io_port->command_char3);
     Keyboard.press(io_port->command_char4);
-    delay(100);
+  }
+  if (get_port_state(io_port) == HIGH) {
     Keyboard.releaseAll();
-
   }
 }
 
