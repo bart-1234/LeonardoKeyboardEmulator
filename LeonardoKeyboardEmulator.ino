@@ -1,3 +1,4 @@
+ 
 // Leonardo Keyboard Emulator version 1.0
 
 #include <Keyboard.h>
@@ -101,36 +102,33 @@ void process_char_command_port(io_port_t *io_port) {
 
 // process a double command port
 void process_double_command_port(io_port_t *io_port) {
-  if (get_port_state(io_port) == LOW) {
+  if (get_key_state(io_port) == key_state_A) {
     Keyboard.press(io_port->command_char);
     Keyboard.press(io_port->command_char2);
-  }
-  if (get_port_state(io_port) == HIGH) {
+    delay(100); 
     Keyboard.releaseAll();
   }
 }
 
 // process a triple command port
 void process_triple_command_port(io_port_t *io_port) {
-  if (get_port_state(io_port) == LOW) {
+  if (get_key_state(io_port) == key_state_A) {
     Keyboard.press(io_port->command_char);
     Keyboard.press(io_port->command_char2);
     Keyboard.press(io_port->command_char3);
-  }
-  if (get_port_state(io_port) == HIGH) {
-    Keyboard.releaseAll();
+    delay(100);
+    Keyboard.releaseAll(); 
   }
 }
 
 // process a quadruple command port
 void process_quadruple_command_port(io_port_t *io_port) {
-  if (get_port_state(io_port) == LOW) {
+  if (get_key_state(io_port) == key_state_A) {
     Keyboard.press(io_port->command_char);
     Keyboard.press(io_port->command_char2);
     Keyboard.press(io_port->command_char3);
     Keyboard.press(io_port->command_char4);
-  }
-  if (get_port_state(io_port) == HIGH) {
+    delay(100); 
     Keyboard.releaseAll();
   }
 }
@@ -197,3 +195,4 @@ void loop() {
   }
   MainAutoLastButtonState = reading;
 }
+
