@@ -3,6 +3,7 @@
 
 #include <Keyboard.h>
 
+
 enum key_states_t { // The states a key can have
   key_state_U,  // Undefined
   key_state_UA, // Undefined, changing to Active
@@ -21,7 +22,7 @@ void process_char_command_port(io_port_t *io_port);                       // The
 void process_double_command_port(io_port_t *io_port);                     // The code to process a double char key is announced here and defined later.
 void process_triple_command_port(io_port_t *io_port);                     // The code to process a triple char key is announced here and defined later.
 void process_quadruple_command_port(io_port_t *io_port);                  // The code to process a quadruple char key is announced here and defined later.
-//void register_key_state(io_port_t *io_port, key_states_t key_state);      // The code to register (not process) a key state change. Register = saving the new state and the time it happened
+void register_key_state(io_port_t *io_port, key_states_t key_state);      // The code to register (not process) a key state change. Register = saving the new state and the time it happened
 
 struct io_port_t {                 // The structure with it's members are defined here.
   String Key;                      // Name of the key
@@ -37,7 +38,7 @@ struct io_port_t {                 // The structure with it's members are define
 
   // all members after this line must be initialized outside the creation of the array io_ports
   key_states_t key_state;           // The last know state of a key, must be set to Undefined at Initialisation
-//  unsigned long time_key_change;    // The time the key_state was changed
+  unsigned long time_key_change;    // The time the key_state was changed
 } ;
 
 // define constants that are used in the program, makes changes easier
@@ -73,17 +74,17 @@ void init_io_ports()
   for (int i = 0; i < IOPORTS; i++)                    // for each io port
   {
     pinMode( io_ports[i].PortNr, io_ports[i].Mode);   // set the mode
-//    register_key_state(&io_ports[i],key_state_U);           // set the default key_state
+    register_key_state(&io_ports[i], key_state_U);    // set the default key_state
   }
 }
 
-//void register_key_state(io_port_t *io_port, key_states_t key_state) {
-//  if (io_port->key_state != key_state)    // register only if the keymillisec()as changed
-//  {
-//    io_port->key_state = key_state;       // register the new state
-//    io_port->time_key_change = millis();  // register the time it happend
-//  }
-//}
+void register_key_state(io_port_t *io_port, key_states_t key_state) {
+  if (io_port->key_state != key_state)    // register only if the key state has changed
+  {
+    io_port->key_state = key_state;       // register the new state
+    io_port->time_key_change = millis();  // register the time it happend
+  }
+}
 
 // return the state of a port
 bool get_port_state(io_port_t *io_port) {
@@ -96,8 +97,37 @@ bool get_port_state(io_port_t *io_port) {
 // For now, whe just return the port_state for testing
 key_states_t get_key_state(io_port_t *io_port) {
   bool port_state = get_port_state(io_port);
-  if (port_state == HIGH) return key_state_I;
-  else return key_state_A;
+  key_states_t new_key_state = key_state_U;                     // initialize to the default value
+  //  if (port_state == HIGH) return key_state_I;
+  //  else return key_state_A;
+  switch (io_port->key_state)                                  // process depending on the previous key state 
+  {
+    case key_state_U:
+      if ((port_state) == HIGH) new_key_state = key_state_UI;  // change from U to UI when inactve  maybe bouncing
+      else new_key_state = key_state_UA;                       // change from U to UA when active   maybe bouncing
+      break;
+    case key_state_UI:
+      if ((port_state) == HIGH) new_key_state = key_state_I;   // change from UI to I when inactive  stable I
+      else new_key_state = key_state_UA;                       // change from UI to UA when active   bouncing
+      break;
+    case key_state_UA:
+      if ((port_state) == HIGH) new_key_state = key_state_UI;  // change from UA to UI                bouncing
+      else new_key_state = key_state_A;                        // change from UA to A                 stable A
+      break;
+    case key_state_A:
+      if ((port_state) == HIGH) new_key_state = key_state_AI;  // change from A to UI                maybe bouncing
+      else new_key_state = key_state_A;                        // no change                          stable A
+      break;
+    case key_state_I:
+      if ((port_state) == HIGH) new_key_state = key_state_I;   // no change                           stable I
+      else new_key_state = key_state_IA;                       // change from I to IA                 maybe bouncing
+      break;
+    default:
+      new_key_state = key_state_U;                              // must not get here so register undifined to be safe
+      break;
+  }
+  register_key_state(io_port, new_key_state);                 // register the new key state
+  return new_key_state;                                  // return the new key state
 }
 
 // process a char command port
