@@ -1,14 +1,7 @@
- 
+
 // Leonardo Keyboard Emulator version 1.0
 
 #include <Keyboard.h>
-
-struct io_port_t;                                         // The structure that holds all port information is announced here and defined later.
-typedef void (*process_key_pointer)(io_port_t *io_port);  // A type definition for a pointer to the code that has to handel the processing of the key.
-void process_char_command_port(io_port_t *io_port);       // The code to process a simple char key is announced here and defined later.
-void process_double_command_port(io_port_t *io_port);     // The code to process a double char key is announced here and defined later.
-void process_triple_command_port(io_port_t *io_port);     // The code to process a triple char key is announced here and defined later.
-void process_quadruple_command_port(io_port_t *io_port);  // The code to process a quadruple char key is announced here and defined later.
 
 enum key_states_t { // The states a key can have
   key_state_U,  // Undefined
@@ -21,6 +14,14 @@ enum key_states_t { // The states a key can have
   key_state_IA,  // Inactieve, changing to Active
   key_state_AI,  // Actieve, changing to Inactive
 };   // The states a key can have
+
+struct io_port_t;                                                         // The structure that holds all port information is announced here and defined later.
+typedef void (*process_key_pointer)(io_port_t *io_port);                  // A type definition for a pointer to the code that has to handel the processing of the key.
+void process_char_command_port(io_port_t *io_port);                       // The code to process a simple char key is announced here and defined later.
+void process_double_command_port(io_port_t *io_port);                     // The code to process a double char key is announced here and defined later.
+void process_triple_command_port(io_port_t *io_port);                     // The code to process a triple char key is announced here and defined later.
+void process_quadruple_command_port(io_port_t *io_port);                  // The code to process a quadruple char key is announced here and defined later.
+//void register_key_state(io_port_t *io_port, key_states_t key_state);      // The code to register (not process) a key state change. Register = saving the new state and the time it happened
 
 struct io_port_t {                 // The structure with it's members are defined here.
   String Key;                      // Name of the key
@@ -35,7 +36,8 @@ struct io_port_t {                 // The structure with it's members are define
   process_key_pointer process_key; // A pointer to the code that has to handel the processing of the key
 
   // all members after this line must be initialized outside the creation of the array io_ports
-  key_states_t key_state;          // The last know state of a key, must be set to Undefined at Initialisation
+  key_states_t key_state;           // The last know state of a key, must be set to Undefined at Initialisation
+//  unsigned long time_key_change;    // The time the key_state was changed
 } ;
 
 // define constants that are used in the program, makes changes easier
@@ -71,9 +73,17 @@ void init_io_ports()
   for (int i = 0; i < IOPORTS; i++)                    // for each io port
   {
     pinMode( io_ports[i].PortNr, io_ports[i].Mode);   // set the mode
-    io_ports[i].key_state = key_state_U;
+//    register_key_state(&io_ports[i],key_state_U);           // set the default key_state
   }
 }
+
+//void register_key_state(io_port_t *io_port, key_states_t key_state) {
+//  if (io_port->key_state != key_state)    // register only if the keymillisec()as changed
+//  {
+//    io_port->key_state = key_state;       // register the new state
+//    io_port->time_key_change = millis();  // register the time it happend
+//  }
+//}
 
 // return the state of a port
 bool get_port_state(io_port_t *io_port) {
@@ -105,7 +115,7 @@ void process_double_command_port(io_port_t *io_port) {
   if (get_key_state(io_port) == key_state_A) {
     Keyboard.press(io_port->command_char);
     Keyboard.press(io_port->command_char2);
-    delay(100); 
+    delay(100);
     Keyboard.releaseAll();
   }
 }
@@ -117,7 +127,7 @@ void process_triple_command_port(io_port_t *io_port) {
     Keyboard.press(io_port->command_char2);
     Keyboard.press(io_port->command_char3);
     delay(100);
-    Keyboard.releaseAll(); 
+    Keyboard.releaseAll();
   }
 }
 
@@ -128,7 +138,7 @@ void process_quadruple_command_port(io_port_t *io_port) {
     Keyboard.press(io_port->command_char2);
     Keyboard.press(io_port->command_char3);
     Keyboard.press(io_port->command_char4);
-    delay(100); 
+    delay(100);
     Keyboard.releaseAll();
   }
 }
@@ -195,4 +205,3 @@ void loop() {
   }
   MainAutoLastButtonState = reading;
 }
-
