@@ -100,7 +100,7 @@ key_states_t get_key_state(io_port_t *io_port) {
   key_states_t new_key_state = key_state_U;                     // initialize to the default value
   //  if (port_state == HIGH) return key_state_I;
   //  else return key_state_A;
-  switch (io_port->key_state)                                  // process depending on the previous key state 
+  switch (io_port->key_state)                                  // process depending on the previous key state
   {
     case key_state_U:
       if ((port_state) == HIGH) new_key_state = key_state_UI;  // change from U to UI when inactve  maybe bouncing
@@ -115,15 +115,15 @@ key_states_t get_key_state(io_port_t *io_port) {
       else new_key_state = key_state_A;                        // change from UA to A                 stable A
       break;
     case key_state_A:
-      if ((port_state) == HIGH) new_key_state = key_state_AI;  // change from A to UI                maybe bouncing
-      else new_key_state = key_state_A;                        // no change                          stable A
+      if ((port_state) == HIGH) new_key_state = key_state_AI;  // change from A to AI                 maybe bouncing
+      else new_key_state = key_state_A;                        // no change                           stable A
       break;
     case key_state_I:
       if ((port_state) == HIGH) new_key_state = key_state_I;   // no change                           stable I
       else new_key_state = key_state_IA;                       // change from I to IA                 maybe bouncing
       break;
     default:
-      new_key_state = key_state_U;                              // must not get here so register undifined to be safe
+      new_key_state = key_state_U;                              // must not get here so register undefined to be safe
       break;
   }
   register_key_state(io_port, new_key_state);                 // register the new key state
