@@ -14,6 +14,8 @@ enum key_states_t { // The states a key can have
   key_state_IP,  // Inactieve, Inactive and Processed
   key_state_IA,  // Inactieve, changing to Active
   key_state_AI,  // Actieve, changing to Inactive
+  key_state_API, // Active and Processed, changing to Inactive
+  key_state_IPA, // Inactive and Processed, changing to Active
 };   // The states a key can have
 
 struct io_port_t;                                                         // The structure that holds all port information is announced here and defined later.
@@ -122,6 +124,16 @@ key_states_t get_key_state(io_port_t *io_port) {
       if ((port_state) == HIGH) new_key_state = key_state_I;   // no change                           stable I
       else new_key_state = key_state_IA;                       // change from I to IA                 maybe bouncing
       break;
+
+    case key_state_API:
+      if ((port_state) == HIGH) new_key_state = key_state_AI;  // change from AP to I                 maybe bouncing
+      else new_key_state = key_state_A;                        // change from AP to A                 maybe bouncing
+      break;
+    case key_state_IPA:
+      if ((port_state) == HIGH) new_key_state = key_state_I;  // change from IP to I                  maybe bouncing
+      else new_key_state = key_state_A;                        // change from IP to A                 maybe bouncing
+      break;
+      
     default:
       new_key_state = key_state_U;                              // must not get here so register undefined to be safe
       break;
