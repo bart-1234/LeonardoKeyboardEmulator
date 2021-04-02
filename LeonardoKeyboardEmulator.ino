@@ -6,16 +6,16 @@
 
 enum key_states_t { // The states a key can have
   key_state_U,  // Undefined
+  key_state_UI, // Undefined, Changing to Inactive
   key_state_UA, // Undefined, changing to Active
+  key_state_I,  // Inactive
+  key_state_IA, // Inactieve, changing to Active
   key_state_A,  // Active
   key_state_AP, // Active and Processed
-  key_state_UI, // Undefined, Changing to Inactive
-  key_state_I,  // Inactive
-  key_state_IP,  // Inactieve, Inactive and Processed
-  key_state_IA,  // Inactieve, changing to Active
-  key_state_AI,  // Actieve, changing to Inactive
   key_state_API, // Active and Processed, changing to Inactive
+  key_state_IP,  // Inactieve, Inactive and Processed
   key_state_IPA, // Inactive and Processed, changing to Active
+  key_state_AI,  // Actieve, changing to Inactive
 };   // The states a key can have
 
 struct io_port_t;                                                         // The structure that holds all port information is announced here and defined later.
@@ -93,6 +93,15 @@ bool get_port_state(io_port_t *io_port) {
   return digitalRead(io_port->PortNr);
 }
 
+// signal an error by sending the error number to the keyboard. Char '0' is added to make the error number readable.
+void signal_error(byte error_number)
+{
+  error_number += '0'; //show the error as char starting at 0
+  Keyboard.press(error_number);
+  delay(1000);                  //avoid flooding the keyboard
+  Keyboard.releaseAll();
+}
+
 // This procedure is the workhorse of debouncing
 // It returns the state of a key.
 // The state of a key depends on the state of the port (HIGH or LOW), how  long is was in this state and many other things (when fully implemented).
@@ -130,16 +139,17 @@ key_states_t get_key_state(io_port_t *io_port) {
       else new_key_state = key_state_A;                        // change from AP to A                 maybe bouncing
       break;
     case key_state_IPA:
-      if ((port_state) == HIGH) new_key_state = key_state_I;  // change from IP to I                  maybe bouncing
+      if ((port_state) == HIGH) new_key_state = key_state_I;   // change from IP to I                  maybe bouncing
       else new_key_state = key_state_A;                        // change from IP to A                 maybe bouncing
       break;
-      
-    default:
-      new_key_state = key_state_U;                              // must not get here so register undefined to be safe
+
+    default: //
+      signal_error(io_port->key_state);                        // signal a fault condition, the error number is the enum member. First member is 0, second 1, etc
+      new_key_state = key_state_U;                             // must not get here so register undefined to be safe
       break;
   }
-  register_key_state(io_port, new_key_state);                 // register the new key state
-  return new_key_state;                                  // return the new key state
+  register_key_state(io_port, new_key_state);                  // register the new key state
+  return new_key_state;                                        // return the new key state
 }
 
 // process a char command port
