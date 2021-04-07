@@ -4,8 +4,8 @@
 #include <Keyboard.h>
 
 enum port_states_t {
-  ACTIVE, //Active 
-  INACTIVE, //Active 
+  ACTIVE, //Active
+  INACTIVE, //Active
 };
 
 enum key_states_t { // The states a key can have
@@ -93,12 +93,11 @@ void register_key_state(io_port_t *io_port, key_states_t key_state) {
 }
 
 // return the state of a port
-bool get_port_state(io_port_t *io_port) {
+port_states_t get_port_state(io_port_t *io_port) {
   if (digitalRead((io_port->PortNr) == LOW))
-  return ACTIVE;
+    return ACTIVE;
   else
-  return INACTIVE;
-  
+    return INACTIVE;
 }
 
 // signal an error by sending the error number to the keyboard. Char '0' is added to make the error number readable.
@@ -115,7 +114,7 @@ void signal_error(byte error_number)
 // The state of a key depends on the state of the port (HIGH or LOW), how  long is was in this state and many other things (when fully implemented).
 // For now, whe just return the port_state for testing
 key_states_t get_key_state(io_port_t *io_port) {
-  bool port_state = get_port_state(io_port);
+  port_states_t port_state = get_port_state(io_port);
   key_states_t new_key_state = key_state_U;                     // initialize to the default value
   //  if (port_state == HIGH) return key_state_I;
   //  else return key_state_A;
