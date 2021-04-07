@@ -3,6 +3,10 @@
 
 #include <Keyboard.h>
 
+enum port_states_t {
+  ACTIVE, //Active 
+  INACTVE, //Active 
+}
 
 enum key_states_t { // The states a key can have
   key_state_U,  // Undefined
