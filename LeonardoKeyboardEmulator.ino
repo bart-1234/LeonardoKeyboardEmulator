@@ -3,10 +3,13 @@
 
 #include <Keyboard.h>
 
-enum port_states_t {
-  ACTIVE, //Active
-  INACTIVE //Active
-};
+//enum port_states_t {
+//  ACTIVE,
+//  INACTIVE
+//};
+
+#define ACTIVE LOW
+#define INACTIVE HIGH
 
 enum key_states_t { // The states a key can have
   key_state_U,  // Undefined
@@ -93,18 +96,14 @@ void register_key_state(io_port_t *io_port, key_states_t key_state) {
 }
 
 // return the state of a port
-port_states_t get_port_state(io_port_t *io_port) {
-//  return digitalRead(io_port->PortNr);
-    if (digitalRead((io_port->PortNr) == LOW))
-    return ACTIVE;
-  else
-    return INACTIVE;
+bool get_port_state(io_port_t *io_port) {
+  return digitalRead(io_port->PortNr);
 }
 
 // signal an error by sending the error number to the keyboard. Char '0' is added to make the error number readable.
 void signal_error(byte error_number)
 {
-  error_number += 'A'; //show the error as char starting at A for error number 0
+  error_number += '0'; //show the error as char starting at 0
   Keyboard.press(error_number);
   delay(1000);                  //avoid flooding the keyboard
   Keyboard.releaseAll();
@@ -115,12 +114,12 @@ void signal_error(byte error_number)
 // The state of a key depends on the state of the port (HIGH or LOW), how  long is was in this state and many other things (when fully implemented).
 // For now, whe just return the port_state for testing
 key_states_t get_key_state(io_port_t *io_port) {
-  port_states_t port_state = get_port_state(io_port);
+  bool port_state = get_port_state(io_port);
   key_states_t new_key_state = key_state_U;                     // initialize to the default value
   //  if (port_state == HIGH) return key_state_I;
   //  else return key_state_A;
   switch (io_port->key_state)                                  // process depending on the previous key state
-  {//
+  {
     case key_state_U:
       if ((port_state) == INACTIVE) new_key_state = key_state_UI;  // change from U to UI when inactve  maybe bouncing
       else new_key_state = key_state_UA;                       // change from U to UA when active   maybe bouncing
@@ -151,10 +150,10 @@ key_states_t get_key_state(io_port_t *io_port) {
       break;
     case key_state_API:
       if ((port_state) == INACTIVE) new_key_state = key_state_I;   // change from AP to I                 maybe bouncing
-      else new_key_state = key_state_A;                        // change from AP to A                 maybe bouncing
+      else new_key_state = key_state_AP;                        // change from AP to A                 maybe bouncing
       break;
     case key_state_IPA:
-      if ((port_state) == INACTIVE) new_key_state = key_state_I;   // change from IP to I                 maybe bouncing
+      if ((port_state) == INACTIVE) new_key_state = key_state_IP;   // change from IP to I                 maybe bouncing
       else new_key_state = key_state_A;                        // change from IP to A                 maybe bouncing
       break;
 
