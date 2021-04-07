@@ -135,11 +135,11 @@ key_states_t get_key_state(io_port_t *io_port) {
       break;
 
     case key_state_API:
-      if ((port_state) == HIGH) new_key_state = key_state_AI;  // change from AP to I                 maybe bouncing
+      if ((port_state) == HIGH) new_key_state = key_state_I;   // change from AP to I                 maybe bouncing
       else new_key_state = key_state_A;                        // change from AP to A                 maybe bouncing
       break;
     case key_state_IPA:
-      if ((port_state) == HIGH) new_key_state = key_state_I;   // change from IP to I                  maybe bouncing
+      if ((port_state) == HIGH) new_key_state = key_state_I;   // change from IP to I                 maybe bouncing
       else new_key_state = key_state_A;                        // change from IP to A                 maybe bouncing
       break;
 
