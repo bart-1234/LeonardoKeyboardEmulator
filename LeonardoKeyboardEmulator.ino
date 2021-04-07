@@ -5,8 +5,8 @@
 
 enum port_states_t {
   ACTIVE, //Active 
-  INACTVE, //Active 
-}
+  INACTIVE, //Active 
+};
 
 enum key_states_t { // The states a key can have
   key_state_U,  // Undefined
@@ -94,7 +94,11 @@ void register_key_state(io_port_t *io_port, key_states_t key_state) {
 
 // return the state of a port
 bool get_port_state(io_port_t *io_port) {
-  return digitalRead(io_port->PortNr);
+  if (digitalRead((io_port->PortNr) == LOW))
+  return ACTIVE;
+  else
+  return INACTIVE;
+  
 }
 
 // signal an error by sending the error number to the keyboard. Char '0' is added to make the error number readable.
@@ -118,33 +122,32 @@ key_states_t get_key_state(io_port_t *io_port) {
   switch (io_port->key_state)                                  // process depending on the previous key state
   {
     case key_state_U:
-      if ((port_state) == HIGH) new_key_state = key_state_UI;  // change from U to UI when inactve  maybe bouncing
-      else new_key_state = key_state_UA;                       // change from U to UA when active   maybe bouncing
+      if ((port_state) == INACTIVE) new_key_state = key_state_UI;  // change from U to UI when inactve    maybe bouncing
+      else new_key_state = key_state_UA;                           // change from U to UA when active     maybe bouncing
       break;
     case key_state_UI:
-      if ((port_state) == HIGH) new_key_state = key_state_I;   // change from UI to I when inactive  stable I
-      else new_key_state = key_state_UA;                       // change from UI to UA when active   bouncing
+      if ((port_state) == INACTIVE) new_key_state = key_state_I;   // change from UI to I when inactive   stable I
+      else new_key_state = key_state_UA;                           // change from UI to UA when active    bouncing
       break;
     case key_state_UA:
-      if ((port_state) == HIGH) new_key_state = key_state_UI;  // change from UA to UI                bouncing
-      else new_key_state = key_state_A;                        // change from UA to A                 stable A
+      if ((port_state) == INACTIVE) new_key_state = key_state_UI;  // change from UA to UI                bouncing
+      else new_key_state = key_state_A;                            // change from UA to A                 stable A
       break;
     case key_state_A:
-      if ((port_state) == HIGH) new_key_state = key_state_AI;  // change from A to AI                 maybe bouncing
-      else new_key_state = key_state_A;                        // no change                           stable A
+      if ((port_state) == INACTIVE) new_key_state = key_state_AI;  // change from A to AI                 maybe bouncing
+      else new_key_state = key_state_A;                            // no change                           stable A
       break;
     case key_state_I:
-      if ((port_state) == HIGH) new_key_state = key_state_I;   // no change                           stable I
-      else new_key_state = key_state_IA;                       // change from I to IA                 maybe bouncing
+      if ((port_state) == INACTIVE) new_key_state = key_state_I;   // no change                           stable I
+      else new_key_state = key_state_IA;                           // change from I to IA                 maybe bouncing
       break;
-
     case key_state_API:
-      if ((port_state) == HIGH) new_key_state = key_state_I;   // change from AP to I                 maybe bouncing
-      else new_key_state = key_state_A;                        // change from AP to A                 maybe bouncing
+      if ((port_state) == INACTIVE) new_key_state = key_state_I;   // change from AP to I                 maybe bouncing
+      else new_key_state = key_state_A;                            // change from AP to A                 maybe bouncing
       break;
     case key_state_IPA:
-      if ((port_state) == HIGH) new_key_state = key_state_I;   // change from IP to I                 maybe bouncing
-      else new_key_state = key_state_A;                        // change from IP to A                 maybe bouncing
+      if ((port_state) == INACTIVE) new_key_state = key_state_A;   // change from IP to I                 maybe bouncing
+      else new_key_state = key_state_I;                            // change from IP to A                 maybe bouncing
       break;
 
     default: //
