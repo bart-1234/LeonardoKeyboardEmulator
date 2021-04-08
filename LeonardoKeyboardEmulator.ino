@@ -168,17 +168,17 @@ key_states_t get_key_state(io_port_t *io_port) {
 
 // process a char command port
 void process_char_command_port(io_port_t *io_port) {
-  if (get_key_state(io_port) == key_state_A) {
+  if (get_key_state(io_port) == key_state_AP) {
     Keyboard.press(io_port->command_char);
   }
-  if (get_key_state(io_port) == key_state_I) {
+  if (get_key_state(io_port) == key_state_IP) {
     Keyboard.release(io_port->command_char);
   }
 }
 
 // process a double command port
 void process_double_command_port(io_port_t *io_port) {
-  if (get_key_state(io_port) == key_state_A) {
+  if (get_key_state(io_port) == key_state_AP) {
     Keyboard.press(io_port->command_char);
     Keyboard.press(io_port->command_char2);
     delay(100);
@@ -188,7 +188,7 @@ void process_double_command_port(io_port_t *io_port) {
 
 // process a triple command port
 void process_triple_command_port(io_port_t *io_port) {
-  if (get_key_state(io_port) == key_state_A) {
+  if (get_key_state(io_port) == key_state_AP) {
     Keyboard.press(io_port->command_char);
     Keyboard.press(io_port->command_char2);
     Keyboard.press(io_port->command_char3);
@@ -199,7 +199,7 @@ void process_triple_command_port(io_port_t *io_port) {
 
 // process a quadruple command port
 void process_quadruple_command_port(io_port_t *io_port) {
-  if (get_key_state(io_port) == key_state_A) {
+  if (get_key_state(io_port) == key_state_AP) {
     Keyboard.press(io_port->command_char);
     Keyboard.press(io_port->command_char2);
     Keyboard.press(io_port->command_char3);
