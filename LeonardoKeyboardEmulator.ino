@@ -136,6 +136,10 @@ key_states_t get_key_state(io_port_t *io_port) {
       if ((port_state) == INACTIVE) new_key_state = key_state_AI;  // change from A to AI                 maybe bouncing
       else new_key_state = key_state_A;                        // no change                           stable A
       break;
+    case key_state_AP:
+      if ((port_state) == INACTIVE) new_key_state = key_state_API;  // change from A to AI                 maybe bouncing
+      else new_key_state = key_state_AP;                            // no change                           stable AP
+      break;   
     case key_state_AI:
       if ((port_state) == INACTIVE) new_key_state = key_state_I;  // change from A to AI                 maybe bouncing
       else new_key_state = key_state_A;                        // no change                           stable A
@@ -168,10 +172,11 @@ key_states_t get_key_state(io_port_t *io_port) {
 
 // process a char command port
 void process_char_command_port(io_port_t *io_port) {
-  if (get_key_state(io_port) == key_state_AP) {
+  if (get_key_state(io_port) == key_state_A) {
     Keyboard.press(io_port->command_char);
+    io_port->key_state=key_state_AP;            // set the state to AP to show it is handled and won't be handled again until the port gets inactive
   }
-  if (get_key_state(io_port) == key_state_IP) {
+  if (get_key_state(io_port) == key_state_I) {
     Keyboard.release(io_port->command_char);
   }
 }
@@ -228,7 +233,7 @@ unsigned long debounceDelay = 50;    // the debounce time; increase if the outpu
 
 void setup() {
   Serial.begin(9600);
-  init_io_ports();       // initialize all io ports
+  init_io_ports();       // initialize all io ports66666666666666666
   Keyboard.begin();
 }
 
