@@ -1,28 +1,29 @@
-
 // Leonardo Keyboard Emulator version 1.0
 
 #include <Keyboard.h>
 
-//enum port_states_t {
-//  ACTIVE,
-//  INACTIVE
-//};
+enum port_states_t {
+  port_state_U,  // Undefined
+  port_state_UA, // Undefined, changing to Active
+  port_state_UI, // Undefined, changing to Inactive
+  port_state_A,  // Active
+  port_state_AI, // Active, changing to Inactive
+  port_state_I,  // Inactive
+  port_state_IA, // Inactive, changing to Active
+};
 
-#define ACTIVE LOW
-#define INACTIVE HIGH
+//#define ACTIVE LOW
+//#define INACTIVE HIGH
+
+#define ACTIVE port_state_A    // LOW
+#define INACTIVE port_state_I  // HIGH
 
 enum key_states_t { // The states a key can have
   key_state_U,  // Undefined
-  key_state_UI, // Undefined, Changing to Inactive
-  key_state_UA, // Undefined, changing to Active
   key_state_I,  // Inactive
-  key_state_IA, // Inactieve, changing to Active
+  key_state_IP, // Inactieve, Inactive and Processed
   key_state_A,  // Active
   key_state_AP, // Active and Processed
-  key_state_API, // Active and Processed, changing to Inactive
-  key_state_IP,  // Inactieve, Inactive and Processed
-  key_state_IPA, // Inactive and Processed, changing to Active
-  key_state_AI,  // Actieve, changing to Inactive
 };   // The states a key can have
 
 struct io_port_t;                                                         // The structure that holds all port information is announced here and defined later.
@@ -31,7 +32,7 @@ void process_char_command_port(io_port_t *io_port);                       // The
 void process_double_command_port(io_port_t *io_port);                     // The code to process a double char key is announced here and defined later.
 void process_triple_command_port(io_port_t *io_port);                     // The code to process a triple char key is announced here and defined later.
 void process_quadruple_command_port(io_port_t *io_port);                  // The code to process a quadruple char key is announced here and defined later.
-void register_key_state(io_port_t *io_port, key_states_t key_state);      // The code to register (not process) a key state change. Register = saving the new state and the time it happened
+void register_port_state(io_port_t *io_port, port_states_t port_state);      // The code to register (not process) a key state change. Register = saving the new state and the time it happened
 
 struct io_port_t {                 // The structure with it's members are defined here.
   String Key;                      // Name of the key
@@ -46,8 +47,9 @@ struct io_port_t {                 // The structure with it's members are define
   process_key_pointer process_key; // A pointer to the code that has to handel the processing of the key
 
   // all members after this line must be initialized outside the creation of the array io_ports
+  port_states_t port_state;        // The last know state of the port, must be set to Undefined at Initialisation
   key_states_t key_state;           // The last know state of a key, must be set to Undefined at Initialisation
-  unsigned long time_key_change;    // The time the key_state was changed
+  unsigned long time_port_change;   // The time the port_state was changed
 } ;
 
 // define constants that are used in the program, makes changes easier
@@ -80,30 +82,62 @@ io_port_t io_ports[IOPORTS] = {                       // Array that contains all
 // initialize the ports
 void init_io_ports()
 {
-  for (int i = 0; i < IOPORTS; i++)                    // for each io port
+  for (int i = 0; i < IOPORTS; i++)                   // for each io port
   {
     pinMode( io_ports[i].PortNr, io_ports[i].Mode);   // set the mode
-    register_key_state(&io_ports[i], key_state_U);    // set the default key_state
+    io_ports[i].port_state = port_state_U;            // set to undefined
+    io_ports[i].key_state = key_state_U;              // set to undefined
+    register_port_state(&io_ports[i], port_state_U);  // register the port state. this will not set the debounce timer because the uninitialized port_state = 0 = port_state_U.
   }
 }
 
-void register_key_state(io_port_t *io_port, key_states_t key_state) {
-  if (io_port->key_state != key_state)    // register only if the key state has changed
+void register_port_state(io_port_t *io_port, port_states_t port_state) {
+  if (io_port->port_state != port_state)    // register only if the port state has changed
   {
-    io_port->key_state = key_state;       // register the new state
-    io_port->time_key_change = millis();  // register the time it happend
+    io_port->port_state = port_state;       // register the new state
+    io_port->time_port_change = millis();   // register the time it happend
   }
 }
 
 // return the state of a port
-bool get_port_state(io_port_t *io_port) {
-  return digitalRead(io_port->PortNr);
+port_states_t get_port_state(io_port_t *io_port) {
+  bool state = digitalRead(io_port->PortNr);
+  switch (io_port->port_state)
+  {
+    case port_state_U:  // Undefined
+      if (state == HIGH) io_port->port_state = port_state_UI;   // changing to Inactive
+      else io_port->port_state = port_state_UA;               // changing to Active
+      break;
+    case port_state_UI: // Undefined, changing to Inactive
+      if (state == HIGH) io_port->port_state = port_state_I;  // changed to Inactive
+      else io_port->port_state = port_state_UA;               // bounce, changing to Active
+      break;
+    case port_state_UA:                                       // Undefined, changing to Active
+      if (state == HIGH) io_port->port_state = port_state_UI; // bounce, changing to Inactive
+      else io_port->port_state = port_state_A;                // changed to Active
+      break;
+    case port_state_A:                                        // Active
+      if (state == HIGH) io_port->port_state = port_state_UI; // changed to Inactive
+      break;
+    case port_state_AI:                                       // Active, changing to Inactive
+      if (state == HIGH) io_port->port_state = port_state_I;  // changed to Inactive
+      else io_port->port_state = port_state_A;                // bounce, changed to Active
+      break;
+    case port_state_I:                                        // Inactive
+      if (state == LOW) io_port->port_state = port_state_A;   // changed to Active
+      break;
+    case port_state_IA: // Inactive, changing to Active
+      if (state == LOW) io_port->port_state = port_state_A;   // changed to Inactive
+      else io_port->port_state = port_state_I;                // bounce, changed to Inactive
+      break;
+  }
+  return io_port->port_state;                                // return the state of the port
 }
 
-// signal an error by sending the error number to the keyboard. Char '0' is added to make the error number readable.
+// signal an error by sending the error number to the keyboard. Char 'A' is added to make the error number readable.
 void signal_error(byte error_number)
 {
-  error_number += '0'; //show the error as char starting at 0
+  error_number += 'A'; //show the error as char starting at 0
   Keyboard.press(error_number);
   delay(1000);                  //avoid flooding the keyboard
   Keyboard.releaseAll();
@@ -115,102 +149,73 @@ void signal_error(byte error_number)
 // For now, whe just return the port_state for testing
 key_states_t get_key_state(io_port_t *io_port) {
   bool port_state = get_port_state(io_port);
-  key_states_t new_key_state = key_state_U;                     // initialize to the default value
-  //  if (port_state == HIGH) return key_state_I;
-  //  else return key_state_A;
-  switch (io_port->key_state)                                  // process depending on the previous key state
+  switch (io_port->key_state)                                           // process depending on the previous key state
   {
     case key_state_U:
-      if ((port_state) == INACTIVE) new_key_state = key_state_UI;  // change from U to UI when inactve  maybe bouncing
-      else new_key_state = key_state_UA;                       // change from U to UA when active   maybe bouncing
+      if ((port_state) == INACTIVE)  io_port->key_state= key_state_I;   // change from U to I, Could also be IP to avoid processing inactive key at power on
+      if ((port_state) == ACTIVE) io_port->key_state = key_state_A;     // change from U to A
       break;
-    case key_state_UI:
-      if ((port_state) == INACTIVE) new_key_state = key_state_I;   // change from UI to I when inactive  stable I
-      else new_key_state = key_state_UA;                       // change from UI to UA when active   bouncing
-      break;
-    case key_state_UA:
-      if ((port_state) == INACTIVE) new_key_state = key_state_UI;  // change from UA to UI                bouncing
-      else new_key_state = key_state_A;                        // change from UA to A                 stable A
-      break;
-    case key_state_A:
-      if ((port_state) == INACTIVE) new_key_state = key_state_AI;  // change from A to AI                 maybe bouncing
-      else new_key_state = key_state_A;                        // no change                           stable A
-      break;
+    case key_state_A:                                                   // this could/should be removed because the A state is (should be) processed and changed to AP by the process_char_command_port, etc routine
     case key_state_AP:
-      if ((port_state) == INACTIVE) new_key_state = key_state_API;  // change from A to AI                 maybe bouncing
-      else new_key_state = key_state_AP;                            // no change                           stable AP
-      break;   
-    case key_state_AI:
-      if ((port_state) == INACTIVE) new_key_state = key_state_I;  // change from A to AI                 maybe bouncing
-      else new_key_state = key_state_A;                        // no change                           stable A
+      if ((port_state) == INACTIVE) io_port->key_state = key_state_I;   // change from U to I
       break;
-    case key_state_I:
-      if ((port_state) == INACTIVE) new_key_state = key_state_I;   // no change                           stable I
-      else new_key_state = key_state_IA;                       // change from I to IA                 maybe bouncing
+    case key_state_I:                                                   // this could/should be removed because the I state is (should be) processed and changed to IP by the process_char_command_port, etc routine
+    case key_state_IP:
+      if ((port_state) == ACTIVE) io_port->key_state = key_state_A;     // change from IP to A
       break;
-    case key_state_IA:
-      if ((port_state) == INACTIVE) new_key_state = key_state_I;   // no change                           stable I
-      else new_key_state = key_state_A;                       // change from I to IA                 maybe bouncing
-      break;
-    case key_state_API:
-      if ((port_state) == INACTIVE) new_key_state = key_state_I;   // change from AP to I                 maybe bouncing
-      else new_key_state = key_state_AP;                        // change from AP to A                 maybe bouncing
-      break;
-    case key_state_IPA:
-      if ((port_state) == INACTIVE) new_key_state = key_state_IP;   // change from IP to I                 maybe bouncing
-      else new_key_state = key_state_A;                        // change from IP to A                 maybe bouncing
-      break;
-
     default: //
-      signal_error(io_port->key_state);                        // signal a fault condition, the error number is the enum member. First member is 0, second 1, etc
-      new_key_state = key_state_U;                             // must not get here so register undefined to be safe
+      signal_error(io_port->key_state);                                 // signal a fault condition, the error number is the enum member. First member is 0, second 1, etc
+      io_port->key_state = key_state_U;                                 // must not get here so register undefined to be safe
       break;
   }
-  register_key_state(io_port, new_key_state);                  // register the new key state
-  return new_key_state;                                        // return the new key state
+  return io_port->key_state;                                         // return the new key state
 }
 
 // process a char command port
 void process_char_command_port(io_port_t *io_port) {
   if (get_key_state(io_port) == key_state_A) {
     Keyboard.press(io_port->command_char);
-    io_port->key_state=key_state_AP;            // set the state to AP to show it is handled and won't be handled again until the port gets inactive
+    io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
   }
   if (get_key_state(io_port) == key_state_I) {
     Keyboard.release(io_port->command_char);
+    io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the port gets active
   }
 }
 
 // process a double command port
 void process_double_command_port(io_port_t *io_port) {
-  if (get_key_state(io_port) == key_state_AP) {
+  if (get_key_state(io_port) == key_state_A) {
     Keyboard.press(io_port->command_char);
     Keyboard.press(io_port->command_char2);
     delay(100);
     Keyboard.releaseAll();
+    io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
   }
 }
 
 // process a triple command port
 void process_triple_command_port(io_port_t *io_port) {
-  if (get_key_state(io_port) == key_state_AP) {
+  if (get_key_state(io_port) == key_state_A) {
     Keyboard.press(io_port->command_char);
     Keyboard.press(io_port->command_char2);
     Keyboard.press(io_port->command_char3);
     delay(100);
     Keyboard.releaseAll();
+    io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
   }
 }
 
 // process a quadruple command port
 void process_quadruple_command_port(io_port_t *io_port) {
-  if (get_key_state(io_port) == key_state_AP) {
+  if (get_key_state(io_port) == key_state_A) {
     Keyboard.press(io_port->command_char);
     Keyboard.press(io_port->command_char2);
     Keyboard.press(io_port->command_char3);
     Keyboard.press(io_port->command_char4);
     delay(100);
     Keyboard.releaseAll();
+    io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
   }
 }
 
