@@ -2,6 +2,8 @@
 //#define Keyboard.press
 #include <Keyboard.h>
 
+//#define DEBUG       //remove comments to see serial output at 115k2
+
 enum port_states_t {
   port_state_U,  // Undefined
   port_state_UA, // Undefined, changing to Active
@@ -132,7 +134,9 @@ String str_key_state(key_states_t key_state) {
 // return the state of a port
 port_states_t get_port_state(io_port_t *io_port) {
   bool state = digitalRead(io_port->PortNr);
+#ifdef DEBUG
   print_state(" Port old: ", str_port_state(io_port->port_state));
+#endif
   switch (io_port->port_state)
   {
     case port_state_U:                                        // Undefined
@@ -166,7 +170,9 @@ port_states_t get_port_state(io_port_t *io_port) {
       io_port->port_state = port_state_U;
       break;
   }
+#ifdef DEBUG
   print_state(" new: ", str_port_state(io_port->port_state));
+#endif
   return io_port->port_state;                                // return the state of the port
 }
 
@@ -176,7 +182,9 @@ port_states_t get_port_state(io_port_t *io_port) {
 // For now, whe just return the port_state for testing
 key_states_t get_key_state(io_port_t *io_port) {
   port_states_t port_state = get_port_state(io_port);
+#ifdef DEBUG
   print_state(" Key old: ", str_key_state(io_port->key_state));
+#endif
   switch (io_port->key_state)                                           // process depending on the previous key state
   {
     case key_state_U:
@@ -196,7 +204,9 @@ key_states_t get_key_state(io_port_t *io_port) {
       io_port->key_state = key_state_U;
       break;
   }
+#ifdef DEBUG
   print_state(" new: ", str_key_state(io_port->key_state));
+#endif
   return io_port->key_state;                                         // return the new key state
 }
 
@@ -251,15 +261,15 @@ void process_quadruple_command_port(io_port_t *io_port) {
 // process the command ports
 void process_command_port(io_port_t *io_port)
 {
-    if (io_port->process_key != NULL)                  // If there is a processing procedure defined
-    {
-      io_ports->process_key(io_port);              // Use the specified procedure to process the port
-    }
+  if (io_port->process_key != NULL)                  // If there is a processing procedure defined
+  {
+    io_ports->process_key(io_port);              // Use the specified procedure to process the port
+  }
 }
 // process the command ports
 void process_command_ports()
 {
-    for (int i = 0; i < IOPORTS; i++)                       // for each io port
+  for (int i = 0; i < IOPORTS; i++)                       // for each io port
     process_command_port(&io_ports[i]);
 }
 
@@ -273,8 +283,8 @@ unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
 unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
 
 void setup() {
-  delay(2000);
-  Serial.begin(9600);
+  delay(1000);
+  Serial.begin(115200);
   delay(1000);
   Serial.println("test");//
   init_io_ports();       // initialize all io ports
@@ -283,7 +293,6 @@ void setup() {
 
 void test_port(io_port_t *io_port) {
   print_state("Pin: ", io_port->PortNr); Serial.println("");
-
   for (;;) {
     // port_states_t port_state = get_port_state(io_port);
     // key_states_t key_state = get_key_state(io_port);
@@ -293,42 +302,44 @@ void test_port(io_port_t *io_port) {
   }
 }
 void loop() {
+#ifdef DEBUG
   test_port(&io_ports[5]);
-  //  process_command_ports();
+#endif
+  process_command_ports();
 
-  //
-  //  //Toggle between Main and Auto menu.
-  //  uint8_t reading = digitalRead(Main_Auto);
-  //  if (reading != MainAutoLastButtonState) {
-  //    // reset the debouncing timer
-  //    lastDebounceTime = millis();
-  //  }
-  //
-  //  if ((millis() - lastDebounceTime) > debounceDelay) {
-  //    // whatever the reading is at, it's been there for longer than the debounce
-  //    // delay, so take it as the actual current state:
-  //
-  //    // if the button state has changed:
-  //    if (reading != MainAutoButtonState) {
-  //      MainAutoButtonState = reading;
-  //
-  //      if (MainAutoButtonState == LOW) {
-  //        MainAutoKeyState = !MainAutoKeyState;
-  //        if (MainAutoKeyState) {
-  //          // Alt+F1
-  //          Keyboard.press(0x82);
-  //          Keyboard.press(0xC2);
-  //          delay(100);
-  //          Keyboard.releaseAll();
-  //        } else {
-  //          // Alt+F4
-  //          Keyboard.press(0x82);
-  //          Keyboard.press(0xC5);
-  //          delay(100);
-  //          Keyboard.releaseAll();
-  //        }
-  //      }
-  //    }
-  //  }
-  //  MainAutoLastButtonState = reading;
+  
+    //Toggle between Main and Auto menu.
+    uint8_t reading = digitalRead(Main_Auto);
+    if (reading != MainAutoLastButtonState) {
+      // reset the debouncing timer
+      lastDebounceTime = millis();
+    }
+  
+    if ((millis() - lastDebounceTime) > debounceDelay) {
+      // whatever the reading is at, it's been there for longer than the debounce
+      // delay, so take it as the actual current state:
+  
+      // if the button state has changed:
+      if (reading != MainAutoButtonState) {
+        MainAutoButtonState = reading;
+  
+        if (MainAutoButtonState == LOW) {
+          MainAutoKeyState = !MainAutoKeyState;
+          if (MainAutoKeyState) {
+            // Alt+F1
+            Keyboard.press(0x82);
+            Keyboard.press(0xC2);
+            delay(100);
+            Keyboard.releaseAll();
+          } else {
+            // Alt+F4
+            Keyboard.press(0x82);
+            Keyboard.press(0xC5);
+            delay(100);
+            Keyboard.releaseAll();
+          }
+        }
+      }
+    }
+    MainAutoLastButtonState = reading;
 }
