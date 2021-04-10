@@ -249,14 +249,18 @@ void process_quadruple_command_port(io_port_t *io_port) {
 }
 
 // process the command ports
+void process_command_port(io_port_t *io_port)
+{
+    if (io_port->process_key != NULL)                  // If there is a processing procedure defined
+    {
+      io_ports->process_key(io_port);              // Use the specified procedure to process the port
+    }
+}
+// process the command ports
 void process_command_ports()
 {
-  for (int i = 5; i < 6; i++)                       // test key pagedown
-    //  for (int i = 0; i < IOPORTS; i++)                       // for each io port
-    if (io_ports[i].process_key != NULL)                  // If there is a processing procedure defined
-    {
-      io_ports[i].process_key(&io_ports[i]);              // Use the specified procedure to process the port
-    }
+    for (int i = 0; i < IOPORTS; i++)                       // for each io port
+    process_command_port(&io_ports[i]);
 }
 
 int Main_Auto = A4;
@@ -274,17 +278,16 @@ void setup() {
   delay(1000);
   Serial.println("test");//
   init_io_ports();       // initialize all io ports
-  //  Keyboard.begin();
+  Keyboard.begin();
 }
-
-
 
 void test_port(io_port_t *io_port) {
   print_state("Pin: ", io_port->PortNr); Serial.println("");
 
   for (;;) {
-    //    port_states_t port_state = get_port_state(io_port);
-    key_states_t key_state = get_key_state(io_port);
+    // port_states_t port_state = get_port_state(io_port);
+    // key_states_t key_state = get_key_state(io_port);
+    process_command_port(io_port);
     Serial.println("");
     delay(1000);
   }
