@@ -1,5 +1,5 @@
 // Leonardo Keyboard Emulator version 1.0
-//#define Keyboard.press
+
 #include <Keyboard.h>
 
 //#define DEBUG       //remove comments to see serial output at 115k2
@@ -49,17 +49,19 @@ struct io_port_t {                 // The structure with it's members are define
 
   // all members after this line must be initialized outside the creation of the array io_ports
   port_states_t port_state;        // The last know state of the port, must be set to Undefined at Initialisation
-  key_states_t key_state;           // The last know state of a key, must be set to Undefined at Initialisation
-  unsigned long time_port_change;   // The time the port_state was changed
+  key_states_t key_state;          // The last know state of a key, must be set to Undefined at Initialisation
+  unsigned long time_port_change;  // The time the port_state was changed
 } ;
 
 // define constants that are used in the program, makes changes easier
 #define DEFAULT_DEBOUNCE_TICS 100  // default debounce tics
-#define IOPORTS 18                 // the number of io ports to initialize
+#define IOPORTS 19                 // the number of io ports to initialize, the firs port is for debugging only
+
 
 // define the io ports to initialze and use, put them in an array that is easier to maintain
 // create an array that holds the io ports
-io_port_t io_ports[IOPORTS] = {                       // Array that contains all io port definitions. note the array starts at 0 and ends at IOPORTS-1
+io_port_t io_ports[IOPORTS] = {  // Array that contains all io port definitions. First definition is for debugging only. Note the array starts at 0 and ends at IOPORTS-1
+  {"Debug", "crtl V", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 'v', 0, 0, &process_double_command_port},             // Double command for debugging
   {"Arrow Left", "X_min", 0, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD8, 0, 0, 0, &process_char_command_port},                   // Single command, "0" means no action.
   {"Arrow Right", "X_plus", 1, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD7, 0, 0, 0, &process_char_command_port},
   {"Arrow Up", "Y_plus", 2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xDA, 0, 0, 0, &process_char_command_port},
@@ -116,7 +118,7 @@ String str_port_state(port_states_t port_state) {
     case port_state_IA:  return "IA";
     case port_state_A:  return "A";
     case port_state_AI:  return "AI";
-    default: return "?";
+    default: return "p?";
   }
 }
 String str_key_state(key_states_t key_state) {
@@ -191,11 +193,11 @@ key_states_t get_key_state(io_port_t *io_port) {
       if ((port_state) == INACTIVE)  io_port->key_state = key_state_I;  // change from U to I, Could also be IP to avoid processing inactive key at power on
       if ((port_state) == ACTIVE) io_port->key_state = key_state_A;     // change from U to A
       break;
-    case key_state_A:                                                   // this could/should be removed because the A state is (should be) processed and changed to AP by the process_char_command_port, etc routine
+    //    case key_state_A:                                                   // this could/should be removed because the A state is (should be) processed and changed to AP by the process_char_command_port, etc routine
     case key_state_AP:
       if ((port_state) == INACTIVE) io_port->key_state = key_state_I;   // change from U to I
       break;
-    case key_state_I:                                                   // this could/should be removed because the I state is (should be) processed and changed to IP by the process_char_command_port, etc routine
+    //    case key_state_I:                                                   // this could/should be removed because the I state is (should be) processed and changed to IP by the process_char_command_port, etc routine
     case key_state_IP:
       if ((port_state) == ACTIVE) io_port->key_state = key_state_A;     // change from IP to A
       break;
@@ -212,24 +214,31 @@ key_states_t get_key_state(io_port_t *io_port) {
 
 // process a char command port
 void process_char_command_port(io_port_t *io_port) {
-  if (get_key_state(io_port) == key_state_A) {
-    Keyboard.press(io_port->command_char);
-    io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
-  }
-  if (get_key_state(io_port) == key_state_I) {
-    Keyboard.release(io_port->command_char);
-    io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the port gets active
+  switch (get_key_state(io_port))
+  {
+    case key_state_A:
+      Keyboard.press(io_port->command_char);
+      io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
+      break;
+    case key_state_I:
+      Keyboard.release(io_port->command_char);
+      io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the port gets active
+      break;
   }
 }
 
 // process a double command port
 void process_double_command_port(io_port_t *io_port) {
-  if (get_key_state(io_port) == key_state_A) {
-    Keyboard.press(io_port->command_char);
-    Keyboard.press(io_port->command_char2);
-    delay(100);
-    Keyboard.releaseAll();
-    io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
+  switch (get_key_state(io_port))
+  {
+    case key_state_A:
+      Keyboard.press(io_port->command_char);
+      Keyboard.press(io_port->command_char2);
+      io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
+    case key_state_I:
+      Keyboard.releaseAll();
+      io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the port gets inactive
+      break;
   }
 }
 
@@ -258,7 +267,7 @@ void process_quadruple_command_port(io_port_t *io_port) {
   }
 }
 
-// process the command ports
+// process a command port
 void process_command_port(io_port_t *io_port)
 {
   if (io_port->process_key != NULL)                  // If there is a processing procedure defined
@@ -266,10 +275,11 @@ void process_command_port(io_port_t *io_port)
     io_ports->process_key(io_port);              // Use the specified procedure to process the port
   }
 }
-// process the command ports
+
+// process all the command ports
 void process_command_ports()
 {
-  for (int i = 0; i < IOPORTS; i++)                       // for each io port
+  for (int i = 1; i < IOPORTS; i++)                       // for each io port except first one, first one is used for debugging
     process_command_port(&io_ports[i]);
 }
 
@@ -286,16 +296,14 @@ void setup() {
   delay(1000);
   Serial.begin(115200);
   delay(1000);
-  Serial.println("test");//
   init_io_ports();       // initialize all io ports
   Keyboard.begin();
 }
 
 void test_port(io_port_t *io_port) {
+  Serial.println("Testing:");//
   print_state("Pin: ", io_port->PortNr); Serial.println("");
   for (;;) {
-    // port_states_t port_state = get_port_state(io_port);
-    // key_states_t key_state = get_key_state(io_port);
     process_command_port(io_port);
     Serial.println("");
     delay(1000);
@@ -303,43 +311,43 @@ void test_port(io_port_t *io_port) {
 }
 void loop() {
 #ifdef DEBUG
-  test_port(&io_ports[5]);
+  test_port(&io_ports[0]);  // first port is only used for debugging ////
 #endif
   process_command_ports();
 
-  
-    //Toggle between Main and Auto menu.
-    uint8_t reading = digitalRead(Main_Auto);
-    if (reading != MainAutoLastButtonState) {
-      // reset the debouncing timer
-      lastDebounceTime = millis();
-    }
-  
-    if ((millis() - lastDebounceTime) > debounceDelay) {
-      // whatever the reading is at, it's been there for longer than the debounce
-      // delay, so take it as the actual current state:
-  
-      // if the button state has changed:
-      if (reading != MainAutoButtonState) {
-        MainAutoButtonState = reading;
-  
-        if (MainAutoButtonState == LOW) {
-          MainAutoKeyState = !MainAutoKeyState;
-          if (MainAutoKeyState) {
-            // Alt+F1
-            Keyboard.press(0x82);
-            Keyboard.press(0xC2);
-            delay(100);
-            Keyboard.releaseAll();
-          } else {
-            // Alt+F4
-            Keyboard.press(0x82);
-            Keyboard.press(0xC5);
-            delay(100);
-            Keyboard.releaseAll();
-          }
-        }
-      }
-    }
-    MainAutoLastButtonState = reading;
+
+  //  //Toggle between Main and Auto menu.
+  //  uint8_t reading = digitalRead(Main_Auto);
+  //  if (reading != MainAutoLastButtonState) {
+  //    // reset the debouncing timer
+  //    lastDebounceTime = millis();
+  //  }
+  //
+  //  if ((millis() - lastDebounceTime) > debounceDelay) {
+  //    // whatever the reading is at, it's been there for longer than the debounce
+  //    // delay, so take it as the actual current state:
+  //
+  //    // if the button state has changed:
+  //    if (reading != MainAutoButtonState) {
+  //      MainAutoButtonState = reading;
+  //
+  //      if (MainAutoButtonState == LOW) {
+  //        MainAutoKeyState = !MainAutoKeyState;
+  //        if (MainAutoKeyState) {
+  //          // Alt+F1
+  //          Keyboard.press(0x82);
+  //          Keyboard.press(0xC2);
+  //          delay(100);
+  //          Keyboard.releaseAll();
+  //        } else {
+  //          // Alt+F4
+  //          Keyboard.press(0x82);
+  //          Keyboard.press(0xC5);
+  //          delay(100);
+  //          Keyboard.releaseAll();
+  //        }
+  //      }
+  //    }
+  //  }
+  //  MainAutoLastButtonState = reading;
 }
