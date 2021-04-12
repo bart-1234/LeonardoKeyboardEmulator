@@ -219,10 +219,12 @@ void process_char_command_port(io_port_t *io_port) {
     case key_state_A:
       Keyboard.press(io_port->command_char);
       io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
+      delay(50);
       break;
     case key_state_I:
       Keyboard.release(io_port->command_char);
       io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the port gets active
+      delay(50);
       break;
   }
 }
@@ -235,35 +237,51 @@ void process_double_command_port(io_port_t *io_port) {
       Keyboard.press(io_port->command_char);
       Keyboard.press(io_port->command_char2);
       io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
+      delay(50);
+      break;
     case key_state_I:
       Keyboard.releaseAll();
       io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the port gets inactive
+      delay(50);
       break;
   }
 }
 
 // process a triple command port
 void process_triple_command_port(io_port_t *io_port) {
-  if (get_key_state(io_port) == key_state_A) {
-    Keyboard.press(io_port->command_char);
-    Keyboard.press(io_port->command_char2);
-    Keyboard.press(io_port->command_char3);
-    delay(100);
-    Keyboard.releaseAll();
-    io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
+  switch (get_key_state(io_port))
+  {
+    case key_state_A:
+      Keyboard.press(io_port->command_char);
+      Keyboard.press(io_port->command_char2);
+      Keyboard.press(io_port->command_char3);
+      io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
+      delay(50);
+      break;
+    case key_state_I:
+      Keyboard.releaseAll();
+      io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the port gets inactive
+      delay(50);
+      break;
   }
 }
 
 // process a quadruple command port
 void process_quadruple_command_port(io_port_t *io_port) {
-  if (get_key_state(io_port) == key_state_A) {
-    Keyboard.press(io_port->command_char);
-    Keyboard.press(io_port->command_char2);
-    Keyboard.press(io_port->command_char3);
-    Keyboard.press(io_port->command_char4);
-    delay(100);
-    Keyboard.releaseAll();
-    io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
+  switch (get_key_state(io_port))
+  {
+    case key_state_A:      Keyboard.press(io_port->command_char);
+      Keyboard.press(io_port->command_char2);
+      Keyboard.press(io_port->command_char3);
+      Keyboard.press(io_port->command_char4);
+      io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
+      delay(50);
+      break;
+    case key_state_I:
+      Keyboard.releaseAll();
+      io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the port gets inactive
+      delay(50);
+      break;
   }
 }
 
@@ -294,7 +312,7 @@ unsigned long debounceDelay = 50;    // the debounce time; increase if the outpu
 
 void setup() {
   delay(1000);
-  Serial.begin(115200);
+  Serial.begin(9600);
   delay(1000);
   init_io_ports();       // initialize all io ports
   Keyboard.begin();
