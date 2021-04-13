@@ -17,6 +17,8 @@ enum port_states_t {
 #define ACTIVE port_state_A    // LOW
 #define INACTIVE port_state_I  // HIGH
 
+#define KEYDELAY 100
+
 enum key_states_t { // The states a key can have
   key_state_U,  // Undefined
   key_state_I,  // Inactive
@@ -72,10 +74,10 @@ io_port_t io_ports[IOPORTS] = {  // Array that contains all io port definitions.
   {"End", "A_min", 7, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD5, 0, 0, 0, &process_char_command_port},
   {"Ctrl", "ctrl", 8, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0, 0, 0, &process_char_command_port},
   {"Shift", "shift", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x81, 0, 0, 0, &process_char_command_port},
-  {"Continuous Jog", "Jog_cont", 10, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x81, 'n', 0, &process_triple_command_port},     // Triple command
-  {"Jog step 0.01", "Jog_001", 11, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x82, 0x81, 'r', &process_quadruple_command_port}, // Quadruple command
-  {"Jog step 0.1", "Jog_01", 12, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x82, 0x81, 's', &process_quadruple_command_port},
-  {"Jog step 1", "Jog_1", 13, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x82, 0x81, 't', &process_quadruple_command_port},
+  {"Continuous Jog", "Jog_cont", 10, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x81, 'N', 0, &process_triple_command_port},     // Triple command
+  {"Jog step 0.01", "Jog_001", 11, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x82, 0x81, 'R', &process_quadruple_command_port}, // Quadruple command
+  {"Jog step 0.1", "Jog_01", 12, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x82, 0x81, 'S', &process_quadruple_command_port},
+  {"Jog step 1", "Jog_1", 13, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x82, 0x81, 'T', &process_quadruple_command_port},
   {"Home sequence", "Home", A2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 'h', 0, 0, &process_double_command_port},             // Double command
   {"Reset", "Reset", A3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 'r', 0, 0, &process_double_command_port},
   {"Toggle Main Auto menu", "Main_Auto", A4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0, 0, 0, 0, NULL},
@@ -218,13 +220,13 @@ void process_char_command_port(io_port_t *io_port) {
   {
     case key_state_A:
       Keyboard.press(io_port->command_char);
+      delay(KEYDELAY);
       io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
-      delay(50);
       break;
     case key_state_I:
       Keyboard.release(io_port->command_char);
       io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the port gets active
-      delay(50);
+      delay(KEYDELAY);
       break;
   }
 }
@@ -236,13 +238,13 @@ void process_double_command_port(io_port_t *io_port) {
     case key_state_A:
       Keyboard.press(io_port->command_char);
       Keyboard.press(io_port->command_char2);
+      delay(KEYDELAY);
+      Keyboard.releaseAll();
       io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
-      delay(50);
       break;
     case key_state_I:
-      Keyboard.releaseAll();
       io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the port gets inactive
-      delay(50);
+      delay(KEYDELAY);
       break;
   }
 }
@@ -253,16 +255,14 @@ void process_triple_command_port(io_port_t *io_port) {
   {
     case key_state_A:
       Keyboard.press(io_port->command_char);
-      delay(50);
       Keyboard.press(io_port->command_char2);
-      delay(50);
       Keyboard.press(io_port->command_char3);
-      delay(100);
+      delay(KEYDELAY);
       Keyboard.releaseAll();
       io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
       break;
     case key_state_I:
-//      Keyboard.releaseAll();
+      //      Keyboard.releaseAll();
       io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the port gets inactive
       delay(50);
       break;
@@ -273,7 +273,7 @@ void process_triple_command_port(io_port_t *io_port) {
 void process_quadruple_command_port(io_port_t *io_port) {
   switch (get_key_state(io_port))
   {
-    case key_state_A: 
+    case key_state_A:
       Keyboard.press(io_port->command_char);
       Keyboard.press(io_port->command_char2);
       Keyboard.press(io_port->command_char3);
