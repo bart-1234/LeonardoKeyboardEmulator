@@ -59,21 +59,30 @@ struct io_port_t {                 // The structure with it's members are define
 #define DEFAULT_DEBOUNCE_TICS 100  // default debounce tics
 #define IOPORTS 19                 // the number of io ports to initialize, the firs port is for debugging only
 
+// Keycodes
+// 0x80 = KEY_LEFT_CTRL
+// 0x81 = KEY_LEFT_SHIFT
+// 0x82 = KEY_LEFT_ALT
 
 // define the io ports to initialze and use, put them in an array that is easier to maintain
 // create an array that holds the io ports
 io_port_t io_ports[IOPORTS] = {  // Array that contains all io port definitions. First definition is for debugging only. Note the array starts at 0 and ends at IOPORTS-1
   {"Debug", "crtl V", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 'v', 0, 0, &process_double_command_port},             // Double command for debugging
+
+  {"Page Down", "Z_min", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD6, 0, 0, 0, &process_char_command_port},              // Tested OK
+  //  {"ctrl N", "Z_plus", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 'N', 0, 0, &process_double_command_port},          // Tested OK
+  {"ctrl alt G", "X_plus", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_LEFT_ALT, 'G', 0, &process_triple_command_port},     // Tested not OK
+
   {"Arrow Left", "X_min", 0, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD8, 0, 0, 0, &process_char_command_port},                   // Single command, "0" means no action.
   {"Arrow Right", "X_plus", 1, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD7, 0, 0, 0, &process_char_command_port},
   {"Arrow Up", "Y_plus", 2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xDA, 0, 0, 0, &process_char_command_port},
   {"Arrow Down", "Y_min", 3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD9, 0, 0, 0, &process_char_command_port},
   {"Page Up", "Z_plus", 4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD3, 0, 0, 0, &process_char_command_port},
-  {"Page Down", "Z_min", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD6, 0, 0, 0, &process_char_command_port},
+  //  {"Page Down", "Z_min", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD6, 0, 0, 0, &process_char_command_port},
   {"Home", "A_plus", 6, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD2, 0, 0, 0, &process_char_command_port},
   {"End", "A_min", 7, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD5, 0, 0, 0, &process_char_command_port},
   {"Ctrl", "ctrl", 8, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0, 0, 0, &process_char_command_port},
-  {"Shift", "shift", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x81, 0, 0, 0, &process_char_command_port},
+  //  {"Shift", "shift", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x81, 0, 0, 0, &process_char_command_port},
   {"Continuous Jog", "Jog_cont", 10, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x81, 'N', 0, &process_triple_command_port},     // Triple command
   {"Jog step 0.01", "Jog_001", 11, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x82, 0x81, 'R', &process_quadruple_command_port}, // Quadruple command
   {"Jog step 0.1", "Jog_01", 12, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x82, 0x81, 'S', &process_quadruple_command_port},
@@ -255,11 +264,14 @@ void process_triple_command_port(io_port_t *io_port) {
   {
     case key_state_A:
       Keyboard.press(io_port->command_char);
+      delay(KEYDELAY);
       Keyboard.press(io_port->command_char2);
+      delay(KEYDELAY);
       Keyboard.press(io_port->command_char3);
       delay(KEYDELAY);
       Keyboard.releaseAll();
-      io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
+      delay(KEYDELAY);
+      //      io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
       break;
     case key_state_I:
       io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the port gets inactive
@@ -297,11 +309,18 @@ void process_command_port(io_port_t *io_port)
   }
 }
 
+// process command port number
+void process_command_port(int i)
+{
+  process_command_port(&io_ports[i]);
+}
+
 // process all the command ports
 void process_command_ports()
 {
   for (int i = 1; i < IOPORTS; i++)                       // for each io port except first one, first one is used for debugging
-    process_command_port(&io_ports[i]);
+    process_command_port(i);
+//   process_command_port(&io_ports[i]);
 }
 
 int Main_Auto = A4;
@@ -330,12 +349,17 @@ void test_port(io_port_t *io_port) {
     delay(1000);
   }
 }
+int PortNr=0;
+
 void loop() {
 #ifdef DEBUG
   test_port(&io_ports[0]);  // first port is only used for debugging ////
 #endif
-  process_command_ports();
-
+  //process_command_ports();
+  process_command_port(PortNr);
+  PortNr++;
+  if (PortNr>=IOPORTS)
+  PortNr=0;
 
   //  //Toggle between Main and Auto menu.
   //  uint8_t reading = digitalRead(Main_Auto);
