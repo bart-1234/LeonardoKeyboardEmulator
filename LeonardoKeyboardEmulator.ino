@@ -57,7 +57,7 @@ struct io_port_t {                 // The structure with it's members are define
 
 // define constants that are used in the program, makes changes easier
 #define DEFAULT_DEBOUNCE_TICS 100  // default debounce tics
-#define IOPORTS 17                // the number of io ports to initialize, the firs port is for debugging only
+#define IOPORTS 18                // the number of io ports to initialize, the firs port is for debugging only
 
 // link to keycodes: https://www.arduino.cc/reference/en/language/functions/usb/keyboard/keyboardmodifiers/
 // 0x80 = KEY_LEFT_CTRL
@@ -69,7 +69,7 @@ struct io_port_t {                 // The structure with it's members are define
 // create an array that holds the io ports
 io_port_t io_ports[IOPORTS] = {  // Array that contains all io port definitions. First definition is for debugging only. Note the array starts at 0 and ends at IOPORTS-1
   //  {"Page Down", "X_min", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_PAGE_DOWN, 0, 0, 0, &process_char_command_port},              // Tested OK
-  {"Page Up", "X_plus", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_LEFT_ALT, KEY_LEFT_SHIFT, 'S', &process_quadruple_command_port},        // Tested not OK  //  {"ctrl N", "Z_plus", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 'N', 0, 0, &process_double_command_port},          // Tested OK
+  //{"Page Up", "X_plus", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_LEFT_ALT, KEY_LEFT_SHIFT, 'S', &process_quadruple_command_port},        // Tested not OK  //  {"ctrl N", "Z_plus", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 'N', 0, 0, &process_double_command_port},          // Tested OK
 
   {"Arrow Left", "X_min", 0, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD8, 0, 0, 0, &process_char_command_port},                   // Single command, "0" means no action.
   {"Arrow Right", "X_plus", 1, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD7, 0, 0, 0, &process_char_command_port},
@@ -79,8 +79,8 @@ io_port_t io_ports[IOPORTS] = {  // Array that contains all io port definitions.
   {"Page Down", "Z_min", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_PAGE_DOWN, 0, 0, 0, &process_char_command_port},
   {"Home", "A_plus", 6, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD2, 0, 0, 0, &process_char_command_port},
   {"End", "A_min", 7, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD5, 0, 0, 0, &process_char_command_port},
-  //  {"Ctrl", "ctrl", 8, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0, 0, 0, &process_char_command_port},
-  //  {"Shift", "shift", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x81, 0, 0, 0, &process_char_command_port},
+  {"Ctrl", "ctrl", 8, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0, 0, 0, &process_char_command_port},
+  {"Shift", "shift", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x81, 0, 0, 0, &process_char_command_port},
   {"Continuous Jog", "Jog_cont", 10, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x81, 'N', 0, &process_triple_command_port},     // Triple command
   {"Jog step 0.01", "Jog_001", 11, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x82, 0x81, 'R', &process_quadruple_command_port}, // Quadruple command
   {"Jog step 0.1", "Jog_01", 12, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x82, 0x81, 'S', &process_quadruple_command_port},
