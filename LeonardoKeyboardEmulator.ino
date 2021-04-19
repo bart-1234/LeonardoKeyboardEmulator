@@ -11,13 +11,13 @@ enum port_states_t {
   port_state_A,  // Active
   port_state_AI, // Active, changing to Inactive
   port_state_I,  // Inactive
-  port_state_IA // Inactive, changing to Active
+  port_state_IA  // Inactive, changing to Active
 };
 
 #define ACTIVE port_state_A    // LOW
 #define INACTIVE port_state_I  // HIGH
 
-#define KEYDELAY 100
+//#define KEYDELAY 100
 
 enum key_states_t { // The states a key can have
   key_state_U,  // Undefined
@@ -88,7 +88,7 @@ io_port_t io_ports[IOPORTS] = {  // Array that contains all io port definitions.
   {"Jog step 1", "Jog_1", 13, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_LEFT_ALT, KEY_LEFT_SHIFT, 'T', &process_quadruple_command_port},
   {"Home sequence", "Home", A2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, 'h', 0, 0, &process_double_command_port},             // Double command
   {"Reset", "Reset", A3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, 'r', 0, 0, &process_double_command_port},
-  {"Toggle Main Auto menu", "Main_Auto", A4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0, 0, 0, 0, &process_toggle_command_port},
+  {"Toggle Main Auto menu", "Main_Auto", A4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_ALT, KEY_F1, KEY_LEFT_ALT, KEY_F4, &process_toggle_command_port},
   {"Mdi Menu", "Mdi", A5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_F6, 0, 0, &process_double_command_port}
 };
 
@@ -203,11 +203,11 @@ key_states_t get_key_state(io_port_t *io_port) {
       if ((port_state) == INACTIVE)  io_port->key_state = key_state_I;  // change from U to I, Could also be IP to avoid processing inactive key at power on
       if ((port_state) == ACTIVE) io_port->key_state = key_state_A;     // change from U to A
       break;
-    //    case key_state_A:                                                   // this could/should be removed because the A state is (should be) processed and changed to AP by the process_char_command_port, etc routine
+    //    case key_state_A:                                             // key_state_A is processed and changed to AP by the process_char_command_port routine
     case key_state_AP:
       if ((port_state) == INACTIVE) io_port->key_state = key_state_I;   // change from U to I
       break;
-    //    case key_state_I:                                                   // this could/should be removed because the I state is (should be) processed and changed to IP by the process_char_command_port, etc routine
+    //    case key_state_I:                                             // case key_state_I is processed and changed to IP by the process_char_command_port routine
     case key_state_IP:
       if ((port_state) == ACTIVE) io_port->key_state = key_state_A;     // change from IP to A
       break;
@@ -228,11 +228,11 @@ void process_char_command_port(io_port_t *io_port) {
   {
     case key_state_A:
       Keyboard.press(io_port->command_char);
-      io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
+      io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the key gets inactive
       break;
     case key_state_I:
       Keyboard.release(io_port->command_char);
-      io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the port gets active
+      io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the key gets active
       break;
   }
 }
@@ -244,11 +244,11 @@ void process_double_command_port(io_port_t *io_port) {
     case key_state_A:
       Keyboard.press(io_port->command_char);
       Keyboard.press(io_port->command_char2);
-      io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
+      io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the key gets inactive
       break;
     case key_state_I:
       Keyboard.releaseAll();
-      io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the port gets inactive
+      io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the key gets inactive
       break;
   }
 }
@@ -261,11 +261,11 @@ void process_triple_command_port(io_port_t *io_port) {
       Keyboard.press(io_port->command_char);
       Keyboard.press(io_port->command_char2);
       Keyboard.press(io_port->command_char3);
-      io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
+      io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the key gets inactive
       break;
     case key_state_I:
       Keyboard.releaseAll();
-      io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the port gets inactive
+      io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the key gets inactive
       break;
   }
 }
@@ -279,11 +279,58 @@ void process_quadruple_command_port(io_port_t *io_port) {
       Keyboard.press(io_port->command_char2);
       Keyboard.press(io_port->command_char3);
       Keyboard.press(io_port->command_char4);
-      io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
-      Keyboard.releaseAll();
+      io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the key gets inactive
       break;
     case key_state_I:
-      io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the port gets inactive
+      Keyboard.releaseAll();
+      io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the key gets inactive
+      break;
+  }
+}
+
+// de volgende variable moet worden toegevoegd aan de structure, dan kunnen er ook meerdere toggle keys worden gedefinieerd. Hij moet dan een algemene naam krijgen die de toggle state weergeeft.
+bool MainAutoKeyState = false;           // the current state of the toggle key
+
+//Toggle between Main and Auto menu.
+void process_toggle_command_port(io_port_t *io_port) {
+  switch (get_key_state(io_port))
+  {
+    //    uint8_t reading = (get_key_state(io_port));
+    //  if (reading != MainAutoLastButtonState) {
+    //    // if the button state has changed:
+    //    if (reading != MainAutoButtonState) {
+    //      MainAutoButtonState = reading;
+    //
+    //      if (MainAutoButtonState == LOW) {
+    //        MainAutoKeyState = !MainAutoKeyState;
+    //        if (MainAutoKeyState) {
+    //        case key_state_A:
+    //          Keyboard.press(KEY_LEFT_ALT);
+    //          Keyboard.press(KEY_F1);
+    //          io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the key gets inactive
+    //          break;
+    //        case key_state_I:
+    //          Keyboard.releaseAll();
+    //          io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the key gets inactive
+    //          break;
+    //        } else {
+    case key_state_A:
+      MainAutoKeyState = !MainAutoKeyState;
+      if (MainAutoKeyState)                                 // Send commands depending on the state of the toggle switch
+      {
+        Keyboard.press(io_port->command_char);
+        Keyboard.press(io_port->command_char2);
+      }
+      else
+      {
+        Keyboard.press(io_port->command_char3);
+        Keyboard.press(io_port->command_char4);
+      }
+      io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the key gets inactive
+      break;
+    case key_state_I:
+      Keyboard.releaseAll();
+      io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the key gets inactive
       break;
   }
 }
@@ -304,11 +351,11 @@ void process_command_ports()
     process_command_port(&io_ports[i]);
 }
 
-int Main_Auto = A4;
-
-uint8_t MainAutoKeyState = HIGH;           // the current state of the key's to send
-uint8_t MainAutoButtonState;             // the current reading from the input pin
-uint8_t MainAutoLastButtonState = LOW;   // the previous reading from the input pin
+//int Main_Auto = A4;
+//
+//uint8_t MainAutoKeyState = HIGH;           // the current state of the key's to send
+//uint8_t MainAutoButtonState;             // the current reading from the input pin
+//uint8_t MainAutoLastButtonState = LOW;   // the previous reading from the input pin
 
 //unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
 //unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
@@ -332,44 +379,9 @@ void test_port(io_port_t *io_port) {
   }
 }
 
-    //Toggle between Main and Auto menu.
-void process_toggle_command_port(io_port_t *io_port) {
-  switch (get_key_state(io_port))
-    uint8_t reading = (get_key_state(io_port));
-    if (reading != MainAutoLastButtonState) {
-      // if the button state has changed:
-      if (reading != MainAutoButtonState) {
-        MainAutoButtonState = reading;
-  
-        if (MainAutoButtonState == LOW) {
-          MainAutoKeyState = !MainAutoKeyState;
-          if (MainAutoKeyState) {
-           case key_state_A:
-            Keyboard.press(KEY_LEFT_ALT);
-            Keyboard.press(KEY_F1);
-            io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
-            break;
-           case key_state_I:
-            Keyboard.releaseAll();
-            io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the port gets inactive
-            break;
-          } else {
-           case key_state_A:
-            Keyboard.press(KEY_LEFT_ALT);
-            Keyboard.press(KEY_F4);
-            io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
-            break;
-           case key_state_I:
-            Keyboard.releaseAll();
-            io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the port gets inactive
-            break;
-          }
-        }
-      }
-    }
 
-    MainAutoLastButtonState = reading;
-}
+//MainAutoLastButtonState = reading;
+//}
 void loop() {
 #ifdef DEBUG
   test_port(&io_ports[0]);  // first port is only used for debugging ////
