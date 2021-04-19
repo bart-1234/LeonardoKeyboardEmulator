@@ -33,6 +33,7 @@ void process_char_command_port(io_port_t *io_port);                       // The
 void process_double_command_port(io_port_t *io_port);                     // The code to process a double char key is announced here and defined later.
 void process_triple_command_port(io_port_t *io_port);                     // The code to process a triple char key is announced here and defined later.
 void process_quadruple_command_port(io_port_t *io_port);                  // The code to process a quadruple char key is announced here and defined later.
+void process_toggle_command_port(io_port_t *io_port);                     // The code to process a toggle key is announced here and defined later.
 void register_port_state(io_port_t *io_port, port_states_t port_state);   // The code to register (not process) a key state change. Register = saving the new state and the time it happened
 void print_state(String ID, String state);                                // Debug routine
 void print_state(String ID, byte state);                                  // Debug routine
@@ -57,7 +58,7 @@ struct io_port_t {                 // The structure with it's members are define
 
 // define constants that are used in the program, makes changes easier
 #define DEFAULT_DEBOUNCE_TICS 100  // default debounce tics
-#define IOPORTS 18                // the number of io ports to initialize, the firs port is for debugging only
+#define IOPORTS 19                // the number of io ports to initialize, the firs port is for debugging only
 
 // link to keycodes: https://www.arduino.cc/reference/en/language/functions/usb/keyboard/keyboardmodifiers/
 // 0x80 = KEY_LEFT_CTRL
@@ -71,24 +72,24 @@ io_port_t io_ports[IOPORTS] = {  // Array that contains all io port definitions.
   //  {"Page Down", "X_min", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_PAGE_DOWN, 0, 0, 0, &process_char_command_port},              // Tested OK
   //{"Page Up", "X_plus", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_LEFT_ALT, KEY_LEFT_SHIFT, 'S', &process_quadruple_command_port},        // Tested not OK  //  {"ctrl N", "Z_plus", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 'N', 0, 0, &process_double_command_port},          // Tested OK
 
-  {"Arrow Left", "X_min", 0, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD8, 0, 0, 0, &process_char_command_port},                   // Single command, "0" means no action.
-  {"Arrow Right", "X_plus", 1, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD7, 0, 0, 0, &process_char_command_port},
-  {"Arrow Up", "Y_plus", 2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xDA, 0, 0, 0, &process_char_command_port},
-  {"Arrow Down", "Y_min", 3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD9, 0, 0, 0, &process_char_command_port},
-  {"Page Up", "Z_plus", 4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD3, 0, 0, 0, &process_char_command_port},
+  {"Arrow Left", "X_min", 0, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_ARROW, 0, 0, 0, &process_char_command_port},                   // Single command, "0" means no action.
+  {"Arrow Right", "X_plus", 1, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_RIGHT_ARROW, 0, 0, 0, &process_char_command_port},
+  {"Arrow Up", "Y_plus", 2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_UP_ARROW, 0, 0, 0, &process_char_command_port},
+  {"Arrow Down", "Y_min", 3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_DOWN_ARROW, 0, 0, 0, &process_char_command_port},
+  {"Page Up", "Z_plus", 4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_PAGE_UP, 0, 0, 0, &process_char_command_port},
   {"Page Down", "Z_min", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_PAGE_DOWN, 0, 0, 0, &process_char_command_port},
-  {"Home", "A_plus", 6, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD2, 0, 0, 0, &process_char_command_port},
-  {"End", "A_min", 7, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0xD5, 0, 0, 0, &process_char_command_port},
-  {"Ctrl", "ctrl", 8, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0, 0, 0, &process_char_command_port},
-  {"Shift", "shift", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x81, 0, 0, 0, &process_char_command_port},
-  {"Continuous Jog", "Jog_cont", 10, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x81, 'N', 0, &process_triple_command_port},     // Triple command
-  {"Jog step 0.01", "Jog_001", 11, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x82, 0x81, 'R', &process_quadruple_command_port}, // Quadruple command
-  {"Jog step 0.1", "Jog_01", 12, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x82, 0x81, 'S', &process_quadruple_command_port},
-  {"Jog step 1", "Jog_1", 13, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0x82, 0x81, 'T', &process_quadruple_command_port},
-  {"Home sequence", "Home", A2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 'h', 0, 0, &process_double_command_port},             // Double command
-  {"Reset", "Reset", A3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 'r', 0, 0, &process_double_command_port},
-  {"Toggle Main Auto menu", "Main_Auto", A4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0, 0, 0, 0, NULL},
-  {"Mdi Menu", "Mdi", A5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 0xC7, 0, 0, &process_double_command_port}
+  {"Home", "A_plus", 6, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_HOME, 0, 0, 0, &process_char_command_port},
+  {"End", "A_min", 7, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_END , 0, 0, 0, &process_char_command_port},
+  {"Ctrl", "ctrl", 8, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, 0, 0, 0, &process_char_command_port},
+  {"Shift", "shift", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_SHIFT, 0, 0, 0, &process_char_command_port},
+  {"Continuous Jog", "Jog_cont", 10, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, 'N', 0, &process_triple_command_port},     // Triple command
+  {"Jog step 0.01", "Jog_001", 11, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_LEFT_ALT, KEY_LEFT_SHIFT, 'R', &process_quadruple_command_port}, // Quadruple command
+  {"Jog step 0.1", "Jog_01", 12, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_LEFT_ALT, KEY_LEFT_SHIFT, 'S', &process_quadruple_command_port},
+  {"Jog step 1", "Jog_1", 13, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_LEFT_ALT, KEY_LEFT_SHIFT, 'T', &process_quadruple_command_port},
+  {"Home sequence", "Home", A2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, 'h', 0, 0, &process_double_command_port},             // Double command
+  {"Reset", "Reset", A3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, 'r', 0, 0, &process_double_command_port},
+  {"Toggle Main Auto menu", "Main_Auto", A4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0, 0, 0, 0, &process_toggle_command_port},
+  {"Mdi Menu", "Mdi", A5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_F6, 0, 0, &process_double_command_port}
 };
 
 void print_state(String ID, String state) {
@@ -309,8 +310,8 @@ uint8_t MainAutoKeyState = HIGH;           // the current state of the key's to 
 uint8_t MainAutoButtonState;             // the current reading from the input pin
 uint8_t MainAutoLastButtonState = LOW;   // the previous reading from the input pin
 
-unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
-unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
+//unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
+//unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
 
 void setup() {
   delay(1000);
@@ -331,45 +332,48 @@ void test_port(io_port_t *io_port) {
   }
 }
 
+    //Toggle between Main and Auto menu.
+void process_toggle_command_port(io_port_t *io_port) {
+  switch (get_key_state(io_port))
+    uint8_t reading = (get_key_state(io_port));
+    if (reading != MainAutoLastButtonState) {
+      // if the button state has changed:
+      if (reading != MainAutoButtonState) {
+        MainAutoButtonState = reading;
+  
+        if (MainAutoButtonState == LOW) {
+          MainAutoKeyState = !MainAutoKeyState;
+          if (MainAutoKeyState) {
+           case key_state_A:
+            Keyboard.press(KEY_LEFT_ALT);
+            Keyboard.press(KEY_F1);
+            io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
+            break;
+           case key_state_I:
+            Keyboard.releaseAll();
+            io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the port gets inactive
+            break;
+          } else {
+           case key_state_A:
+            Keyboard.press(KEY_LEFT_ALT);
+            Keyboard.press(KEY_F4);
+            io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the port gets inactive
+            break;
+           case key_state_I:
+            Keyboard.releaseAll();
+            io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the port gets inactive
+            break;
+          }
+        }
+      }
+    }
+
+    MainAutoLastButtonState = reading;
+}
 void loop() {
 #ifdef DEBUG
   test_port(&io_ports[0]);  // first port is only used for debugging ////
 #endif
 
   process_command_ports();
-
-  //  //Toggle between Main and Auto menu.
-  //  uint8_t reading = digitalRead(Main_Auto);
-  //  if (reading != MainAutoLastButtonState) {
-  //    // reset the debouncing timer
-  //    lastDebounceTime = millis();
-  //  }
-  //
-  //  if ((millis() - lastDebounceTime) > debounceDelay) {
-  //    // whatever the reading is at, it's been there for longer than the debounce
-  //    // delay, so take it as the actual current state:
-  //
-  //    // if the button state has changed:
-  //    if (reading != MainAutoButtonState) {
-  //      MainAutoButtonState = reading;
-  //
-  //      if (MainAutoButtonState == LOW) {
-  //        MainAutoKeyState = !MainAutoKeyState;
-  //        if (MainAutoKeyState) {
-  //          // Alt+F1
-  //          Keyboard.press(0x82);
-  //          Keyboard.press(0xC2);
-  //          delay(100);
-  //          Keyboard.releaseAll();
-  //        } else {
-  //          // Alt+F4
-  //          Keyboard.press(0x82);
-  //          Keyboard.press(0xC5);
-  //          delay(100);
-  //          Keyboard.releaseAll();
-  //        }
-  //      }
-  //    }
-  //  }
-  //  MainAutoLastButtonState = reading;
 }
