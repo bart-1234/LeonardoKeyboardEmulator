@@ -48,7 +48,7 @@ struct io_port_t {                 // The structure with it's members are define
   char command_char2;              // Second character
   char command_char3;              // Third character
   char command_char4;              // Fourth character
-  bool MainAutoKeyState;
+  bool ToggleKeyState;             // This bool stores the actual key state and is used for toggle switches.
   process_key_pointer process_key; // A pointer to the code that has to handel the processing of the key
 
   // all members after this line must be initialized outside the creation of the array io_ports
@@ -59,7 +59,7 @@ struct io_port_t {                 // The structure with it's members are define
 
 // define constants that are used in the program, makes changes easier
 #define DEFAULT_DEBOUNCE_TICS 100  // default debounce tics
-#define IOPORTS 19                // the number of io ports to initialize, the firs port is for debugging only
+#define IOPORTS 18                 // the number of io ports to initialize, the firs port is for debugging only
 
 // link to keycodes: https://www.arduino.cc/reference/en/language/functions/usb/keyboard/keyboardmodifiers/
 // 0x80 = KEY_LEFT_CTRL
@@ -73,24 +73,24 @@ io_port_t io_ports[IOPORTS] = {  // Array that contains all io port definitions.
   //  {"Page Down", "X_min", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_PAGE_DOWN, 0, 0, 0, &process_char_command_port},              // Tested OK
   //{"Page Up", "X_plus", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_LEFT_ALT, KEY_LEFT_SHIFT, 'S', &process_quadruple_command_port},        // Tested not OK  //  {"ctrl N", "Z_plus", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, 0x80, 'N', 0, 0, &process_double_command_port},          // Tested OK
 
-  {"Arrow Left", "X_min", 0, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_ARROW, 0, 0, 0, &process_char_command_port},                   // Single command, "0" means no action.
-  {"Arrow Right", "X_plus", 1, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_RIGHT_ARROW, 0, 0, 0, &process_char_command_port},
-  {"Arrow Up", "Y_plus", 2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_UP_ARROW, 0, 0, 0, &process_char_command_port},
-  {"Arrow Down", "Y_min", 3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_DOWN_ARROW, 0, 0, 0, &process_char_command_port},
-  {"Page Up", "Z_plus", 4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_PAGE_UP, 0, 0, 0, &process_char_command_port},
-  {"Page Down", "Z_min", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_PAGE_DOWN, 0, 0, 0, &process_char_command_port},
-  {"Home", "A_plus", 6, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_HOME, 0, 0, 0, &process_char_command_port},
-  {"End", "A_min", 7, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_END , 0, 0, 0, &process_char_command_port},
-  {"Ctrl", "ctrl", 8, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, 0, 0, 0, &process_char_command_port},
-  {"Shift", "shift", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_SHIFT, 0, 0, 0, &process_char_command_port},
-  {"Continuous Jog", "Jog_cont", 10, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, 'N', 0, &process_triple_command_port},     // Triple command
-  {"Jog step 0.01", "Jog_001", 11, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_LEFT_ALT, KEY_LEFT_SHIFT, 'R', &process_quadruple_command_port}, // Quadruple command
-  {"Jog step 0.1", "Jog_01", 12, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_LEFT_ALT, KEY_LEFT_SHIFT, 'S', &process_quadruple_command_port},
-  {"Jog step 1", "Jog_1", 13, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_LEFT_ALT, KEY_LEFT_SHIFT, 'T', &process_quadruple_command_port},
-  {"Home sequence", "Home", A2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, 'h', 0, 0, &process_double_command_port},             // Double command
-  {"Reset", "Reset", A3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, 'r', 0, 0, &process_double_command_port},
-  {"Toggle Main Auto menu", "Main_Auto", A4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_ALT, KEY_F1, KEY_LEFT_ALT, KEY_F4, false, &process_toggle_command_port},
-  {"Mdi Menu", "Mdi", A5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_F6, 0, 0, &process_double_command_port}
+  {"Arrow Left", "X_min", 0, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_ARROW, 0, 0, 0, false, &process_char_command_port},                                     // Single command, "0" means no action.
+  {"Arrow Right", "X_plus", 1, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_RIGHT_ARROW, 0, 0, 0, false, &process_char_command_port},
+  {"Arrow Up", "Y_plus", 2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_UP_ARROW, 0, 0, 0, false, &process_char_command_port},
+  {"Arrow Down", "Y_min", 3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_DOWN_ARROW, 0, 0, 0, false, &process_char_command_port},
+  {"Page Up", "Z_plus", 4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_PAGE_UP, 0, 0, 0, false, &process_char_command_port},
+  {"Page Down", "Z_min", 5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_PAGE_DOWN, 0, 0, 0, false, &process_char_command_port},
+  {"Home", "A_plus", 6, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_HOME, 0, 0, 0, false, &process_char_command_port},
+  {"End", "A_min", 7, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_END , 0, 0, 0, false, &process_char_command_port},
+  {"Ctrl", "ctrl", 8, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, 0, 0, 0, false, &process_char_command_port},
+  {"Shift", "shift", 9, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_SHIFT, 0, 0, 0, false, &process_char_command_port},
+  {"Continuous Jog", "Jog_cont", 10, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_LEFT_SHIFT, 'N', 0, false, &process_triple_command_port},              // Triple command
+  {"Jog step 0.01", "Jog_001", 11, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_LEFT_ALT, KEY_LEFT_SHIFT, 'R', false, &process_quadruple_command_port},  // Quadruple command
+  {"Jog step 0.1", "Jog_01", 12, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_LEFT_ALT, KEY_LEFT_SHIFT, 'S', false, &process_quadruple_command_port},
+  {"Jog step 1", "Jog_1", 13, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_LEFT_ALT, KEY_LEFT_SHIFT, 'T', false, &process_quadruple_command_port},
+  {"Home sequence", "Home", A2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, 'h', 0, 0, false, &process_double_command_port},                                // Double command
+  {"Reset", "Reset", A3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, 'r', 0, 0, false, &process_double_command_port},                                      
+  {"Toggle Main Auto menu", "Main_Auto", A4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_ALT, KEY_F1, KEY_LEFT_ALT, KEY_F4, false, &process_toggle_command_port}, // Toggle command, Char 1&2 are used for one side and 3&4 for the other side.
+  {"Mdi Menu", "Mdi", A5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_F6, 0, 0, false, &process_double_command_port}
 };
 
 void print_state(String ID, String state) {
@@ -290,15 +290,15 @@ void process_quadruple_command_port(io_port_t *io_port) {
 }
 
 // de volgende variable moet worden toegevoegd aan de structure, dan kunnen er ook meerdere toggle keys worden gedefinieerd. Hij moet dan een algemene naam krijgen die de toggle state weergeeft.
-// bool MainAutoKeyState = false;           // the current state of the toggle key
+// bool ToggleKeyState = false;           // the current state of the toggle key
 
 //Toggle between Main and Auto menu.
 void process_toggle_command_port(io_port_t *io_port) {
   switch (get_key_state(io_port))
   {
     case key_state_A:
-      (io_port->MainAutoKeyState) = !(io_port->MainAutoKeyState);
-      if (io_port->MainAutoKeyState)                                 // Send commands depending on the state of the toggle switch
+      (io_port->ToggleKeyState) = !(io_port->ToggleKeyState);
+      if (io_port->ToggleKeyState)                                 // Send commands depending on the state of the toggle switch
       {
         Keyboard.press(io_port->command_char);
         Keyboard.press(io_port->command_char2);
@@ -315,7 +315,6 @@ void process_toggle_command_port(io_port_t *io_port) {
       io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the key gets inactive
       break;
   }
-  (io_port->MainAutoKeyState)= true;
 }
 
 // process a command port
