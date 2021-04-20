@@ -48,6 +48,7 @@ struct io_port_t {                 // The structure with it's members are define
   char command_char2;              // Second character
   char command_char3;              // Third character
   char command_char4;              // Fourth character
+  bool MainAutoKeyState;
   process_key_pointer process_key; // A pointer to the code that has to handel the processing of the key
 
   // all members after this line must be initialized outside the creation of the array io_ports
@@ -88,7 +89,7 @@ io_port_t io_ports[IOPORTS] = {  // Array that contains all io port definitions.
   {"Jog step 1", "Jog_1", 13, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_LEFT_ALT, KEY_LEFT_SHIFT, 'T', &process_quadruple_command_port},
   {"Home sequence", "Home", A2, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, 'h', 0, 0, &process_double_command_port},             // Double command
   {"Reset", "Reset", A3, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, 'r', 0, 0, &process_double_command_port},
-  {"Toggle Main Auto menu", "Main_Auto", A4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_ALT, KEY_F1, KEY_LEFT_ALT, KEY_F4, &process_toggle_command_port},
+  {"Toggle Main Auto menu", "Main_Auto", A4, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_ALT, KEY_F1, KEY_LEFT_ALT, KEY_F4, false, &process_toggle_command_port},
   {"Mdi Menu", "Mdi", A5, INPUT_PULLUP, DEFAULT_DEBOUNCE_TICS, KEY_LEFT_CTRL, KEY_F6, 0, 0, &process_double_command_port}
 };
 
@@ -289,34 +290,15 @@ void process_quadruple_command_port(io_port_t *io_port) {
 }
 
 // de volgende variable moet worden toegevoegd aan de structure, dan kunnen er ook meerdere toggle keys worden gedefinieerd. Hij moet dan een algemene naam krijgen die de toggle state weergeeft.
-bool MainAutoKeyState = false;           // the current state of the toggle key
+// bool MainAutoKeyState = false;           // the current state of the toggle key
 
 //Toggle between Main and Auto menu.
 void process_toggle_command_port(io_port_t *io_port) {
   switch (get_key_state(io_port))
   {
-    //    uint8_t reading = (get_key_state(io_port));
-    //  if (reading != MainAutoLastButtonState) {
-    //    // if the button state has changed:
-    //    if (reading != MainAutoButtonState) {
-    //      MainAutoButtonState = reading;
-    //
-    //      if (MainAutoButtonState == LOW) {
-    //        MainAutoKeyState = !MainAutoKeyState;
-    //        if (MainAutoKeyState) {
-    //        case key_state_A:
-    //          Keyboard.press(KEY_LEFT_ALT);
-    //          Keyboard.press(KEY_F1);
-    //          io_port->key_state = key_state_AP;          // set the state to AP to show it is handled and won't be handled again until the key gets inactive
-    //          break;
-    //        case key_state_I:
-    //          Keyboard.releaseAll();
-    //          io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the key gets inactive
-    //          break;
-    //        } else {
     case key_state_A:
-      MainAutoKeyState = !MainAutoKeyState;
-      if (MainAutoKeyState)                                 // Send commands depending on the state of the toggle switch
+      (io_port->MainAutoKeyState) = !(io_port->MainAutoKeyState);
+      if (io_port->MainAutoKeyState)                                 // Send commands depending on the state of the toggle switch
       {
         Keyboard.press(io_port->command_char);
         Keyboard.press(io_port->command_char2);
@@ -333,6 +315,7 @@ void process_toggle_command_port(io_port_t *io_port) {
       io_port->key_state = key_state_IP;          // set the state to IP to show it is handled and won't be handled again until the key gets inactive
       break;
   }
+  (io_port->MainAutoKeyState)= true;
 }
 
 // process a command port
@@ -350,15 +333,6 @@ void process_command_ports()
   for (int i = 0; i < IOPORTS; i++)                       // for each io port except first one, first one is used for debugging
     process_command_port(&io_ports[i]);
 }
-
-//int Main_Auto = A4;
-//
-//uint8_t MainAutoKeyState = HIGH;           // the current state of the key's to send
-//uint8_t MainAutoButtonState;             // the current reading from the input pin
-//uint8_t MainAutoLastButtonState = LOW;   // the previous reading from the input pin
-
-//unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
-//unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
 
 void setup() {
   delay(1000);
