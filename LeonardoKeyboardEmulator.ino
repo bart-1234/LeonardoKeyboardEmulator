@@ -144,8 +144,10 @@ port_states_t get_port_state(io_port_t *io_port) {
   switch (io_port->port_state)
   {
     case port_state_U:                                        // Undefined
-      if (state == HIGH) io_port->port_state = port_state_UI; // changing to Inactive
-      else io_port->port_state = port_state_UA;               // changing to Active
+//      if (state == HIGH) io_port->port_state = port_state_UI; // changing to Inactive
+//      else io_port->port_state = port_state_UA;               // changing to Active
+      if (state == HIGH) register_port_state(io_port, port_state_UI);   // changing to Inactive
+      else register_port_state(io_port, port_state_UA);                 // changing to Active
       break;
     case port_state_UI:                                       // Undefined, changing to Inactive
       if (state == HIGH) io_port->port_state = port_state_I;  // changed to Inactive
