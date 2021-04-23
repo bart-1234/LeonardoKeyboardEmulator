@@ -55,7 +55,7 @@ struct io_port_t {                 // The structure with it's members are define
 } ;
 
 // define constants that are used in the program, makes changes easier
-#define DEFAULT_DEBOUNCE_TICS 100  // default debounce tics
+#define DEFAULT_DEBOUNCE_TICS 2000  // default debounce tics
 #define IOPORTS 18                 // the number of io ports to initialize, the firs port is for debugging only
 
 // define the io ports to initialze and use, put them in an array that is easier to maintain
@@ -143,33 +143,31 @@ port_states_t get_port_state(io_port_t *io_port) {
 #endif
   switch (io_port->port_state)
   {
-    case port_state_U:                                        // Undefined
-//      if (state == HIGH) io_port->port_state = port_state_UI; // changing to Inactive
-//      else io_port->port_state = port_state_UA;               // changing to Active
+    case port_state_U:                                                  // Undefined
       if (state == HIGH) register_port_state(io_port, port_state_UI);   // changing to Inactive
       else register_port_state(io_port, port_state_UA);                 // changing to Active
       break;
-    case port_state_UI:                                       // Undefined, changing to Inactive
-      if (state == HIGH) io_port->port_state = port_state_I;  // changed to Inactive
-      else io_port->port_state = port_state_UA;               // bounce, changing to Active
+    case port_state_UI:                                                 // Undefined, changing to Inactive
+      if (state == HIGH) register_port_state(io_port, port_state_I);    // changed to Inactive
+      else register_port_state(io_port, port_state_UA);                 // bounce, changing to Active
       break;
-    case port_state_UA:                                       // Undefined, changing to Active
-      if (state == HIGH) io_port->port_state = port_state_UI; // bounce, changing to Inactive
-      else io_port->port_state = port_state_A;                // changed to Active
+    case port_state_UA:                                                 // Undefined, changing to Active
+      if (state == HIGH) register_port_state(io_port, port_state_UI);   // bounce, changing to Inactive
+      else register_port_state(io_port, port_state_A);                  // changed to Active
       break;
-    case port_state_A:                                        // Active
-      if (state == HIGH) io_port->port_state = port_state_AI; // changing to Inactive
+    case port_state_A:                                                  // Active
+      if (state == HIGH) register_port_state(io_port, port_state_AI);   // changing to Inactive
       break;
-    case port_state_AI:                                       // Active, changing to Inactive
-      if (state == HIGH) io_port->port_state = port_state_I;  // changed to Inactive
-      else io_port->port_state = port_state_A;                // bounce, changed to Active
+    case port_state_AI:                                                 // Active, changing to Inactive
+      if (state == HIGH) register_port_state(io_port, port_state_I);    // changed to Inactive
+      else register_port_state(io_port, port_state_A);                  // bounce, changed to Active
       break;
-    case port_state_I:                                        // Inactive
-      if (state == LOW) io_port->port_state = port_state_IA;   // changing to Active
+    case port_state_I:                                                  // Inactive
+      if (state == HIGH) register_port_state(io_port, port_state_IA);   // changing to Active
       break;
-    case port_state_IA:                                       // Inactive, changing to Active
-      if (state == LOW) io_port->port_state = port_state_A;   // changed to Inactive
-      else io_port->port_state = port_state_I;                // bounce, changed to Inactive
+    case port_state_IA:                                                 // Inactive, changing to Active
+      if (state == HIGH) register_port_state(io_port, port_state_A);    // changed to Inactive
+      else register_port_state(io_port, port_state_I);                  // bounce, changed to Inactive
       break;
     default:
       print_state("Port state unprocessed: ", str_port_state(io_port->port_state)); // must not get here, set to undefined and signal fault condition
